@@ -1,0 +1,8 @@
+7
+sleep 1
+sleep 1 &
+echo m
+bitch why
+sleep 1 &
+bitch why
+sleep 1 &
