@@ -3,6 +3,7 @@
 
 #include <unistd.h> // For geteuid()
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <signal.h> //for kill
 #include <pwd.h> // For getpwuid()
 #include <limits.h>
@@ -23,6 +24,7 @@
 #define MAX_HIST_SIZE 20
 #define HIST_DISPLAY 10
 
+
 // Regular text
 #define BLK "\e[0;30m"
 #define RED "\e[0;31m"
@@ -34,21 +36,22 @@
 #define WHT "\e[0;37m"
 #define GREY "\x1B[90m"
 #define COL_RESET "\x1B[0m"
-char *OLDPWD;
-
-int no_of_bg ;
 
 typedef struct bg_process
 {
-    pid_t pid;
+    int pid;
     struct bg_process *next;
     struct bg_process *prev;
     int status;
     char *command;
 } bg_process;
 
-bg_process *Head_bg;
-char HOME[1024];
+extern char *OLDPWD;
+extern int no_of_bg ;
+extern bg_process *Head_bg;
+extern char HOME[1024];
+
+
 
 
 

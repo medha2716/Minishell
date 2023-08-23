@@ -1,6 +1,5 @@
 #include "headers.h"
 
-
 void print_path()
 {
     char *path = calloc(PATHno_of_tokens_MAX, sizeof(char));

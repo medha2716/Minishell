@@ -1,5 +1,6 @@
 #include "headers.h"
 
+
 int total_finds;
 char e_path[1024];//used to change directory (e flag)
 

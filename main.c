@@ -1,5 +1,11 @@
 #include "headers.h"
 
+char *OLDPWD;
+int no_of_bg ;
+bg_process *Head_bg;
+char HOME[1024];
+
+
 char *sh_read_line()
 {
 
@@ -102,7 +108,7 @@ void sigchld_handler(int signo)
     //   serrno = errno;
     while (1)
     {
-        pid = waitpid(WAIT_ANY, &status, WNOHANG);
+        pid = waitpid(-1, &status, WNOHANG);
         if (pid < 0)
         {
             // perror("waitpid");
@@ -134,7 +140,7 @@ int foreground(char **args)
     {
         if (execvp(args[0], args))
         {
-            printf("ERROR: '%s' is not a valid command\n", args[0], stderr);
+            printf("ERROR: '%s' is not a valid command\n", args[0]);
 
             return 1; // what if arguments are the problem?
         }
@@ -210,7 +216,7 @@ int background(char **args)
 
         if (execvp(args[0], args))
         {
-            printf("ERROR: '%s' is not a valid command\n", args[0], stderr);
+            printf("ERROR: '%s' is not a valid command\n", args[0]);
             return 1; // what if arguments are the problem?
         }
     }

@@ -1,6 +1,6 @@
 
 #include "headers.h"
-
+ 
 int check_if_pastevents(char* line)
 {
     char* result=strstr(line,"pastevents");
