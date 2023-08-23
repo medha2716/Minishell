@@ -1,4 +1,4 @@
-8
+9
 sleep 1
 sleep 1 &
 echo m
@@ -7,3 +7,4 @@ sleep 1 &
 bitch why
 sleep 1 &
 peek -l
+proclore

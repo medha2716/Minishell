@@ -53,7 +53,7 @@ extern char HOME[1024];
 
 
 
-
+void proclore(char *pid);
 
 
 int compare_entries(const void *a, const void *b);

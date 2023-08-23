@@ -327,6 +327,16 @@ void sh_exec(char **args, char *line_execute_pastevnts)
     {
         seek(args);
     }
+    else if (strcmp("proclore", args[0]) == 0)
+    {
+        if(!args[1])
+            proclore("self");
+        else
+        {
+            proclore(args[1]);
+        }
+            
+    }
     else
     {
 
