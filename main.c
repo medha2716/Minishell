@@ -101,34 +101,6 @@ char **sh_extract_commands(char *line) // tokens in this are entire commands not
     free(stor_line);
     return tokens;
 }
-void sigchld_handler(int signo)
-{
-
-    // update status
-
-    int pid, status;
-    // int serrno;
-    //   serrno = errno;
-    while (1)
-    {
-        pid = waitpid(-1, &status, WNOHANG);
-        if (pid < 0)
-        {
-            // perror("waitpid");
-            break;
-        }
-        if (pid == 0)
-            break;
-        bg_process *temp = Head_bg->next;
-        while (temp != NULL)
-        {
-            if (temp->pid == pid)
-                temp->status = status;
-            temp = temp->next;
-        }
-    }
-    //   errno = serrno;
-}
 
 int foreground(char **args)
 {
@@ -150,11 +122,12 @@ int foreground(char **args)
             printf(COL_RESET);
             return 1; // what if arguments are the problem?
         }
+        printf("%s %s\n", args[0], args[1]);
     }
     else
     {
-
         wait(NULL);
+        // printf("hi\n");
     }
 
     return 0;
@@ -170,35 +143,8 @@ void add_to_list_bg(bg_process *new)
     return;
 }
 
-void sigusr1_handler_function(int sig)
-{
-    int status;
-    int pid;
-
-    // Wait for child process to terminate and get its exit status
-    while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
-    {
-        if (pid < 0)
-        {
-            // perror("waitpid");
-            break;
-        }
-
-        bg_process *temp = Head_bg->next;
-        while (temp != NULL)
-        {
-            if (temp->pid == pid)
-                temp->status = status;
-            temp = temp->next;
-        }
-    }
-}
 int background(char **args)
 {
-    struct sigaction sa;
-    sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
-    sa.sa_handler = &sigusr1_handler_function;
-    sigaction(SIGCHLD, &sa, NULL);
 
     pid_t pid = fork();
 
@@ -228,7 +174,7 @@ int background(char **args)
 
         ++no_of_bg;
         bg_process *new_bg_process = (bg_process *)malloc(sizeof(bg_process));
-        new_bg_process->command = (char *)malloc(sizeof(char) * 1024);
+        new_bg_process->command = (char *)malloc(sizeof(char) * 5000);
         strcpy(new_bg_process->command, args[0]);
         new_bg_process->next = NULL;
         new_bg_process->prev = NULL;
@@ -244,8 +190,12 @@ int background(char **args)
 
 void remove_bg_list(bg_process *temp)
 {
-    if (temp->prev)
-        temp->prev->next = temp->next;
+    bg_process *next = temp->next;
+    bg_process *prev = temp->prev;
+    if (next)
+        next->prev = prev;
+    if (prev)
+        prev->next = next;
     free(temp);
     return;
 }
@@ -254,38 +204,37 @@ void check_bg_if_ended()
 {
 
     bg_process *temp = Head_bg->next;
+
     while (temp != NULL)
     {
+        // printf("hi\n");
+        // printf("bitch why %d\n",temp->pid);
+
         int status;
-        status = temp->status;
-        // int result=waitpid(temp->pid,&status,WNOHANG);
 
-        // if (result == 0)
-        // {
-        //     // printf("Process with PID %d is still running.\n", temp->pid);
-        //     //empty cause i dont want to delete this "if" i will forget the logic
-        // }
-        // else if (result == temp->pid)
-        // {
-        if (WIFEXITED(status))
+        int result = waitpid(temp->pid, &status, WNOHANG);
+
+        if (result == 0)
         {
-            printf("%s exited normally (%d)\n", temp->command, temp->pid);
-            remove_bg_list(temp);
-            no_of_bg--;
+            // printf("Process with PID %d is still running.\n", temp->pid);
+            // empty cause i dont want to delete this "if" i will forget the logic
         }
-        else if (WIFSIGNALED(status))
+        else if (result == temp->pid)
         {
-            printf("%s ended abnormally (%d) due to signal: %d\n", temp->command, temp->pid, WTERMSIG(status));
-            remove_bg_list(temp);
-            no_of_bg--;
+            if (WIFEXITED(status))
+            {
+                printf("%s exited normally (%d)\n", temp->command, temp->pid);
+                remove_bg_list(temp);
+                no_of_bg--;
+            }
+            else if (WIFSIGNALED(status))
+            {
+                printf("%s ended abnormally (%d) due to signal: %d\n", temp->command, temp->pid, WTERMSIG(status));
+                remove_bg_list(temp);
+                no_of_bg--;
+            }
         }
 
-        // }
-        // else if (result == -1)
-        // {
-        //     perror("waitpid");
-        //     // Handle error if necessary
-        // }
         temp = temp->next;
     }
 }
@@ -293,7 +242,7 @@ void check_bg_if_ended()
 void sh_exec(char **args, char *line_execute_pastevnts)
 {
     int i = 0;
-    char **args_bg = (char **)malloc(100 * sizeof(char *));
+    char **args_bg = (char **)malloc(5000 * sizeof(char *));
     if (strcmp("warp", args[i]) == 0)
     {
 
@@ -358,7 +307,7 @@ void sh_exec(char **args, char *line_execute_pastevnts)
             // printf("%s %s\n",args[0],args[1]);
             for (int j = 0; j < (i - 1); j++)
             {
-                args_bg[j] = (char *)malloc(sizeof(char) * 1024);
+                args_bg[j] = (char *)malloc(sizeof(char) * 5000);
                 strcpy(args_bg[j], args[j]);
             }
             args_bg[i - 1] = NULL;
@@ -392,8 +341,10 @@ int main()
     {
         prompt();                    // specification 1
         char *line = sh_read_line(); // accept command from user
-        long start_of_process = time(NULL);
         check_bg_if_ended();
+
+        long start_of_process = time(NULL);
+
         // PASTEVENTS HISTORY!!!!!!!!!
         char line_copy[5000];
         strcpy(line_copy, line);
@@ -411,17 +362,8 @@ int main()
             char **tokens = sh_split_line(commands_separated_by_semicolon[i]); // specification 2
 
             i++;
-            // printf("%s",commands_separated_by_semicolon[i]);
-            // printf("%s",tokens[0]);
-            // int j = 0;
             if (tokens[0] != NULL) // no command
             {
-                // if (j == 0)
-                // {
-
-                //     j = 1;
-                // }
-
                 sh_exec(tokens, line_copy);
             }
 
@@ -429,11 +371,12 @@ int main()
         } // free memory before next command
         long end_of_process = time(NULL);
         time_flag = end_of_process - start_of_process;
-
-        //     if (time >= 2)
-        //     {
-        //         printf("# %ss for %ld seconds\n", args[0], time);
-        //     }
+        char *result = strstr(line_copy, "pastevents execute");
+        if (result != NULL)
+        {
+            char *changed_line = add_to_history(line_copy);
+            add_command(changed_line);
+        }
         free(commands_separated_by_semicolon);
         free(line);
     }
