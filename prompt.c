@@ -10,19 +10,37 @@ void prompt()
     uid = geteuid();
     pw = getpwuid(uid);
     if (!pw)
+    {
+        perror(MAG);
         perror("Couldn't find UID!");
+        perror(COL_RESET);
+        return ;
+    }
+        
     char *username = pw->pw_name;
     
 
     // path
-    char *path = calloc(PATHno_of_tokens_MAX, sizeof(char));
-    if (!getcwd(path, PATHno_of_tokens_MAX))
+    char *path = calloc(PATH_MAX, sizeof(char));
+    if (!getcwd(path, PATH_MAX))
+    {
+        perror(MAG);
         perror("Couldn't get the Working Directory");
+        perror(COL_RESET);
+        return ;
+    }
+        
 
     // HOSTNAME
-    char hostname[513];
-    if (gethostname(hostname, 512))
+    char hostname[5001];
+    if (gethostname(hostname, 5000))
+     {
+        perror(MAG);
         perror("Couldn't find hostname!");
+        perror(COL_RESET);
+        return ;
+    }
+        
 
     printf(GREY);
     printf("<");
@@ -48,6 +66,16 @@ void prompt()
     {
         printf("%s", path);
     }
+    printf(COL_RESET);
+    // sleep : 5s
+    if(time_flag>2)
+    {
+    printf(YEL);
+    printf(" %s : %lds ",arg_0,time_flag);
+    printf(COL_RESET);
+    }
+
+     printf(GREY);
     printf("> ");
     printf(COL_RESET);
 }

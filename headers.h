@@ -29,9 +29,9 @@
 #define BLK "\e[0;30m"
 #define RED "\e[0;31m"
 #define GRN "\e[0;32m"
-#define YEL "\e[0;33m"
+#define YEL "\e[0;35m"
 #define BLU "\e[0;34m"
-#define MAG "\e[0;35m"
+#define MAG "\e[0;33m"
 #define CYN "\e[0;36m"
 #define WHT "\e[0;37m"
 #define GREY "\x1B[90m"
@@ -50,8 +50,8 @@ extern char *OLDPWD;
 extern int no_of_bg ;
 extern bg_process *Head_bg;
 extern char HOME[1024];
-
-
+extern long time_flag;
+extern char arg_0[1024];
 
 void proclore(char *pid);
 

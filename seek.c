@@ -2,7 +2,7 @@
 
 
 int total_finds;
-char e_path[1024];//used to change directory (e flag)
+char e_path[PATH_MAX];//used to change directory (e flag)
 
 int is_match(const char *name, const char *search_term) {
     int term_len = strlen(search_term);
@@ -26,7 +26,9 @@ int is_match(const char *name, const char *search_term) {
 void search_directory(int only_files,int only_dir,const int target,const char *dir_path, const char *search_term) {
     DIR *dir = opendir(dir_path);
     if (dir == NULL) {
+        perror(MAG);
         perror("opendir");
+        perror(COL_RESET);
         return;
     }
 
@@ -36,12 +38,14 @@ void search_directory(int only_files,int only_dir,const int target,const char *d
             continue;
         }
 
-        char full_path[1024];
+        char full_path[PATH_MAX];
         snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, entry->d_name);
 
         struct stat entry_stat;
         if (stat(full_path, &entry_stat) == -1) {
+            perror(MAG);
             perror("stat");
+            perror(COL_RESET);
             continue;
         }
         
@@ -87,7 +91,9 @@ int seek( char *args[]) {
     int i=1;
     if(!args[i])
     {
+        printf(MAG);
         printf("seek: less arguments than required\n");
+        printf(COL_RESET);
         return 1;
     }
     while(args[i][0]=='-')
@@ -100,7 +106,9 @@ int seek( char *args[]) {
             d_flag=1;
         else
             {
+                printf(MAG);
                 printf("Invalid flags!\n");
+                printf(COL_RESET);
                 return 1;
             }
         i++;
@@ -108,7 +116,9 @@ int seek( char *args[]) {
     
     if(d_flag && l_flag)
     {
+        printf(MAG);
         printf("Invalid flags!\n");
+        printf(COL_RESET);
         return 1;
     }
 
@@ -141,7 +151,7 @@ int seek( char *args[]) {
         }
         if (strcmp(place, ".") == 0)
         {
-            char curr_dir[1024];
+            char curr_dir[PATH_MAX];
             getcwd(curr_dir,sizeof(curr_dir));
                strcat(target_directory, curr_dir);
             strcat(target_directory, "/");
@@ -171,7 +181,9 @@ int seek( char *args[]) {
     
     if(total_finds==0)
     {
+        printf(MAG);
         printf("No match found!\n");
+        printf(COL_RESET);
         return 0;
     }
 
@@ -181,7 +193,9 @@ int seek( char *args[]) {
         {
             struct stat entry_stat;
             if (stat(e_path, &entry_stat) == -1) {
+                perror(MAG);
                 perror("stat");
+                perror(COL_RESET);
                 return 1;
             }
             if (S_ISDIR(entry_stat.st_mode))
@@ -195,11 +209,13 @@ int seek( char *args[]) {
                 FILE *rfile = fopen(e_path, "r");
                 if (!rfile)
                 {
+                    perror(MAG);
                     perror("Error opening file");
+                    perror(COL_RESET);
                     return 1;
                 }
 
-                char str_buf[1024];
+                char str_buf[1000000]; //reading only 1e6 bytes of file to display on terminal
                 while (fgets(str_buf, sizeof(str_buf), rfile) != NULL)
                 {
                     printf("%s", str_buf);

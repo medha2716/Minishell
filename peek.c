@@ -67,7 +67,9 @@ int peek_print(const char *path, int show_hidden, int show_details)
 
     if (!dir)
     {
-        perror("No such file or directory");
+        printf(MAG);
+        printf("No such file or directory\n");
+        printf(COL_RESET);
         return 1;
     }
     int no_of_entries = 0;
@@ -92,27 +94,33 @@ int peek_print(const char *path, int show_hidden, int show_details)
         struct stat file_stat;
         if (lstat(full_path_to_entry, &file_stat) < 0)
         {
+            perror(MAG);
             perror("Error getting file stats");
+            perror(COL_RESET);
             closedir(dir);
             return 1;
         }
 
         if (show_details) //-l used
         {
-            char time_buf[100];
+            char time_buf[2000];
             strftime(time_buf, sizeof(time_buf), "%b %d %H:%M", localtime(&file_stat.st_mtime));
 
             struct passwd *owner = getpwuid(file_stat.st_uid);
             if (owner == NULL)
             {
+                perror(MAG);
                 perror("getpwuid");
+                perror(COL_RESET);
                 return 1;
             }
 
             struct group *group = getgrgid(file_stat.st_gid);
             if (group == NULL)
             {
+                perror(MAG);
                 perror("getgrgid");
+                perror(COL_RESET);
                 return 1;
             }
 
@@ -128,7 +136,7 @@ int peek_print(const char *path, int show_hidden, int show_details)
 
 int peek(char **args)
 {
-    char *path = calloc(PATHno_of_tokens_MAX, sizeof(char));
+    char *path = calloc(PATH_MAX, sizeof(char));
     int show_hidden = 0;
     int show_details = 0;
     int start = 2;
@@ -171,7 +179,9 @@ int peek(char **args)
             }
             else // "peek -"
             {
+                printf(MAG);
                 printf("No such file or directory\n");
+                printf(COL_RESET);
                 return 1;
             }
 

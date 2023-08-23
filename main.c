@@ -1,10 +1,11 @@
 #include "headers.h"
 
 char *OLDPWD;
-int no_of_bg ;
+int no_of_bg;
 bg_process *Head_bg;
 char HOME[1024];
-
+long time_flag;
+char arg_0[1024];
 
 char *sh_read_line()
 {
@@ -16,7 +17,9 @@ char *sh_read_line()
 
     if (chars_read == -1)
     {
+        printf(MAG);
         printf("An error occurred while reading input.\n");
+        printf(COL_RESET);
     }
 
     return line;
@@ -130,62 +133,29 @@ void sigchld_handler(int signo)
 int foreground(char **args)
 {
 
-    long start_of_process = time(NULL);
-    
     pid_t pid = fork();
     if (pid < 0)
-        perror("Couldn't make a foreground fork of process!");
+        {
+            perror(MAG);
+            perror("Couldn't make a foreground fork of process!");
+            perror(COL_RESET);
+        }
+      
 
     if (pid == 0)
     {
         if (execvp(args[0], args))
         {
+            printf(MAG);
             printf("ERROR: '%s' is not a valid command\n", args[0]);
-
+            printf(COL_RESET);
             return 1; // what if arguments are the problem?
         }
     }
     else
     {
 
-        // Pause bg processes
-        // bg_process* temp=Head_bg->next;
-        // while(temp!=NULL)
-        // {
-        //     if((temp->status)==(-100))
-        //         kill(temp->pid, SIGSTOP);
-        // }
-        // Wait for fg process to finish
-        // wait(NULL);
-
         wait(NULL);
-
-        //Resume bg processes
-        // bg_process* temp=Head_bg->next;
-        // while(temp!=NULL)
-        // {
-        //     if((temp->status)==28) //28 is for SIGSTOP //also put code for if it ends due to a signal other than 28
-        //         {
-        //             kill(temp->pid, SIGCONT);
-        //             temp->status=-100;
-        //         }
-        // }
-
-        // ASKKKKKK
-    }
-      int status;
-    waitpid(pid, &status, 0); // Wait for the child process to finish
-
-    if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
-    {
-        // Child process succeeded
-        long end_of_process = time(NULL);
-        long time = end_of_process - start_of_process;
-
-        if (time >= 2)
-        {
-            printf("# %ss for %ld seconds\n", args[0], time);
-        }
     }
 
     return 0;
@@ -207,8 +177,12 @@ int background(char **args)
     pid_t pid = fork();
 
     if (pid < 0)
-        perror("Couldn't make a background fork of process!");
-
+    {
+       perror(MAG);
+            perror("Couldn't make a background fork of process!");
+            perror(COL_RESET);
+    }
+        
     if (pid == 0)
     {
 
@@ -216,7 +190,9 @@ int background(char **args)
 
         if (execvp(args[0], args))
         {
+            printf(MAG);
             printf("ERROR: '%s' is not a valid command\n", args[0]);
+            printf(COL_RESET);
             return 1; // what if arguments are the problem?
         }
     }
@@ -252,7 +228,9 @@ void check_bg_if_ended()
     bg_process *temp = Head_bg->next;
     while (temp != NULL)
     {
-        int status = temp->status;
+        int status;
+        status = temp->status;
+        // int result=waitpid(temp->pid,&status,WNOHANG);
 
         // if (result == 0)
         // {
@@ -309,7 +287,9 @@ void sh_exec(char **args, char *line_execute_pastevnts)
         {
             if (!args[2])
             {
+                printf(MAG);
                 printf("ERROR: pastevents execute: too few arguments\n");
+                printf(COL_RESET);
             }
             else
             {
@@ -329,13 +309,12 @@ void sh_exec(char **args, char *line_execute_pastevnts)
     }
     else if (strcmp("proclore", args[0]) == 0)
     {
-        if(!args[1])
+        if (!args[1])
             proclore("self");
         else
         {
             proclore(args[1]);
         }
-            
     }
     else
     {
@@ -372,7 +351,7 @@ void sh_exec(char **args, char *line_execute_pastevnts)
 int main()
 {
     no_of_bg = 0;
-    OLDPWD = calloc(PATHno_of_tokens_MAX, sizeof(char));
+    OLDPWD = calloc(PATH_MAX, sizeof(char));
     Head_bg = (bg_process *)malloc(sizeof(bg_process));
     Head_bg->next = NULL;
     Head_bg->prev = NULL;
@@ -385,7 +364,7 @@ int main()
     {
         prompt();                    // specification 1
         char *line = sh_read_line(); // accept command from user
-
+        long start_of_process = time(NULL);
         check_bg_if_ended();
         // PASTEVENTS HISTORY!!!!!!!!!
         char line_copy[5000];
@@ -402,18 +381,31 @@ int main()
         while (commands_separated_by_semicolon[i] != NULL)
         {
             char **tokens = sh_split_line(commands_separated_by_semicolon[i]); // specification 2
+
             i++;
             // printf("%s",commands_separated_by_semicolon[i]);
             // printf("%s",tokens[0]);
+            int j = 0;
             if (tokens[0] != NULL) // no command
             {
-                
+                if (j == 0)
+                {
+                    strcpy(arg_0, tokens[0]);
+                    j = 1;
+                }
+
                 sh_exec(tokens, line_copy);
             }
 
             free(tokens);
         } // free memory before next command
+        long end_of_process = time(NULL);
+        time_flag = end_of_process - start_of_process;
 
+        //     if (time >= 2)
+        //     {
+        //         printf("# %ss for %ld seconds\n", args[0], time);
+        //     }
         free(commands_separated_by_semicolon);
         free(line);
     }

@@ -2,17 +2,15 @@
 
 void print_path()
 {
-    char *path = calloc(PATHno_of_tokens_MAX, sizeof(char));
-    getcwd(path, PATHno_of_tokens_MAX);
+    char *path = calloc(PATH_MAX, sizeof(char));
+    getcwd(path, PATH_MAX);
     printf("%s\n", path);
 }
 void warp(char **args) // what happens if warp - in the very beginning??
 {
-  
-    char *CURPWD = calloc(PATHno_of_tokens_MAX, sizeof(char));
-    getcwd(CURPWD, PATHno_of_tokens_MAX);
 
-    
+    char *CURPWD = calloc(PATH_MAX, sizeof(char));
+    getcwd(CURPWD, PATH_MAX);
 
     if (args[1] == NULL)
     {
@@ -21,7 +19,9 @@ void warp(char **args) // what happens if warp - in the very beginning??
 
         if (chdir(pw->pw_dir) != 0)
         {
-            perror("shell: warp:");
+            perror(MAG);
+            perror("warp: ");
+            perror(COL_RESET);
         }
         else
         {
@@ -44,10 +44,12 @@ void warp(char **args) // what happens if warp - in the very beginning??
             //    printf("%s\n",place);
             if (strcmp(place, "~") == 0)
             {
-                
+
                 if (chdir(HOME) != 0)
                 {
-                    perror("shell: warp:");
+                    perror(MAG);
+                    perror("warp: ");
+                    perror(COL_RESET);
                     break;
                 }
 
@@ -59,7 +61,9 @@ void warp(char **args) // what happens if warp - in the very beginning??
                 if (chdir(OLDPWD) != 0)
                 {
 
-                    perror("shell: warp:");
+                    perror(MAG);
+                    perror("warp: ");
+                    perror(COL_RESET);
                     break;
                 }
 
@@ -70,7 +74,9 @@ void warp(char **args) // what happens if warp - in the very beginning??
 
                 if (chdir(place) != 0)
                 {
-                    perror("shell: warp: ");
+                    perror(MAG);
+                    perror("warp: ");
+                    perror(COL_RESET);
                     // printf("%s %s %s\n",args[pos],args[pos+1],place);
                     break; // in a single path if at any point error come out eg.in "home/try hope" home/try is 1 path
                 }

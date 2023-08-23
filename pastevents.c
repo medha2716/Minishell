@@ -11,12 +11,12 @@ int check_if_pastevents(char* line)
 }
 void remove_oldest_command()
 {
-    char bkpath[1024];
+    char bkpath[PATH_MAX];
     strcpy(bkpath,HOME);
     strcat(bkpath,"/");
     strcat(bkpath,BOOKKEEP_FILE_PATH);
 
-    char tpath[1024];
+    char tpath[PATH_MAX];
     strcpy(tpath,HOME);
     strcat(tpath,"/");
     strcat(tpath,TEMP_FILE_PATH);
@@ -24,20 +24,24 @@ void remove_oldest_command()
     FILE *sourceFile = fopen(bkpath, "r");
     if (!sourceFile)
     {
-        perror("Error opening source file");
+        printf(MAG);
+        printf("Error opening pastevents file\n");
+        printf(COL_RESET);
         return;
     }
 
     FILE *tempFile = fopen(tpath, "w");
     if (!tempFile)
     {
-        perror("Error creating temporary file");
+        printf(MAG);
+        printf("Error creating temporary file\n");
+        printf(COL_RESET);
         fclose(sourceFile);
         return;
     }
 
     int lineNumber = 1;
-    char line[512]; // Adjust size as needed
+    char line[5000]; //assuming each command is less than 4096 bytes
 
     while (fgets(line, sizeof(line), sourceFile))
     {
@@ -60,7 +64,7 @@ int add_command(char *command)
 {
     int append_command = 0;
     // read no of commands and update it
-     char bkpath[1024];
+     char bkpath[PATH_MAX];
     strcpy(bkpath,HOME);
     strcat(bkpath,"/");
     strcat(bkpath,BOOKKEEP_FILE_PATH);
@@ -68,7 +72,9 @@ int add_command(char *command)
     FILE *rfile = fopen(bkpath, "r+");
     if (!rfile)
     {
-        perror("Error opening file");
+        printf(MAG);
+        printf("Error opening pastevents file\n");
+        printf(COL_RESET);
         return 1;
     }
     int currCount;
@@ -80,7 +86,7 @@ int add_command(char *command)
     }
 
     // Check if the command is the same as the last command in history
-    char lastCommand[50000];      // Adjust size as needed
+    char lastCommand[5000];      
     fseek(rfile, -2, SEEK_END); // Move before the last newline character
     while (ftell(rfile) > 0)
     {
@@ -92,7 +98,7 @@ int add_command(char *command)
         fseek(rfile, -2, SEEK_CUR);
     }
     fgets(lastCommand, sizeof(lastCommand), rfile);
-    char currCommand[50000];
+    char currCommand[5000];
     strcat(currCommand, command);
     strcat(currCommand, "\n");
     // printf("%s %s\n",lastCommand,currCommand);
@@ -104,10 +110,13 @@ int add_command(char *command)
         // beginning of file
         if (fseek(rfile, 0, SEEK_SET) != 0)
         {
-            perror("Error seeking to the beginning of file");
+            printf(MAG);
+            printf("Error seeking to the beginning of pastevents file\n");
+            printf(COL_RESET);
             fclose(rfile);
             return 1;
         }
+
         fprintf(rfile, "%d\n", currCount + 1);
         append_command = 1;
     }
@@ -120,7 +129,9 @@ int add_command(char *command)
         FILE *wfile = fopen(bkpath, "a");
         if (!wfile)
         {
-            perror("Error opening file");
+            printf(MAG);
+            printf("Error opening pastevents file\n");
+            printf(COL_RESET);
             return 1;
         }
         fprintf(wfile, "%s\n", command);
@@ -132,14 +143,16 @@ int add_command(char *command)
 
 int pastevents_purge()
 {
-    char bkpath[1024];
+    char bkpath[PATH_MAX];
     strcpy(bkpath,HOME);
     strcat(bkpath,"/");
     strcat(bkpath,BOOKKEEP_FILE_PATH);
     FILE *rfile = fopen(bkpath, "w");
     if (!rfile)
     {
-        perror("Error opening file");
+        printf(MAG);
+        printf("Error opening pastevents file\n");
+        printf(COL_RESET);
         return 1;
     }
     fprintf(rfile, "%d\n", 0);
@@ -147,17 +160,19 @@ int pastevents_purge()
 }
 int read_command()
 {
-    char bkpath[1024];
+    char bkpath[PATH_MAX];
     strcpy(bkpath,HOME);
     strcat(bkpath,"/");
     strcat(bkpath,BOOKKEEP_FILE_PATH);
     FILE *bitchworld = fopen(bkpath, "r");
     if (!bitchworld)
     {
-        perror("Error opening file");
+        printf(MAG);
+        printf("Error opening pastevents file\n");
+        printf(COL_RESET);
         return 1;
     }
-    char bitch[50000];
+    char bitch[5000];
     int i = 0;
      fseek(bitchworld, 0, SEEK_SET);
     while (fgets(bitch, sizeof(bitch), bitchworld))
@@ -202,21 +217,23 @@ void execute(char* line)
 }
 int execute_command(int command_position,char* to_be_added)
 {
-    char bkpath[1024];
+    char bkpath[PATH_MAX];
     strcpy(bkpath,HOME);
     strcat(bkpath,"/");
     strcat(bkpath,BOOKKEEP_FILE_PATH);
     FILE *read_file = fopen(bkpath, "r");
     if (!read_file)
     {
-        perror("Error opening file");
+        printf(MAG);
+        printf("Error opening pastevents file\n");
+        printf(COL_RESET);
         return 1;
     }
     int currCount;
     fscanf(read_file, "%d", &currCount);
     int pos = currCount - command_position +2;
     // printf("%d\n",pos);
-    char line[50000];
+    char line[5000];
     int i = 1;
     while (fgets(line, sizeof(line), read_file))
     {

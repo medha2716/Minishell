@@ -3,10 +3,10 @@
 void proclore(char *pid)
 {
 
-    char stat_path[1024];
-    char status[1024];
+    char stat_path[PATH_MAX];
+    char status[PATH_MAX];
     int pgroup, vmemory;
-    char executable_path[1024];
+    char executable_path[PATH_MAX];
 
     snprintf(stat_path, sizeof(stat_path), "/proc/%s/stat", pid);
 
@@ -14,7 +14,9 @@ void proclore(char *pid)
     FILE *stat_file = fopen(stat_path, "r");
     if (!stat_file)
     {
+        perror(MAG);
         perror("Error opening stat file");
+        perror(COL_RESET);
         return;
     }
 
@@ -57,12 +59,14 @@ void proclore(char *pid)
     }
     else
     {
+        perror(MAG);
         perror("Error reading executable path");
+        perror(COL_RESET);
         return;
     }
 
     //
-
+    
     int terminal_foreground_pgid = tcgetpgrp(STDIN_FILENO);
 
     // Compare the PGID with the terminal's foreground process group ID
