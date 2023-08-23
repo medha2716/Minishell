@@ -191,10 +191,10 @@ void execute(char* line)
         char line_copy[5000];
         strcpy(line_copy,line);
         line_copy[strlen(line_copy)-1]='\0';
-        int flag_add_to_history=0;
-        flag_add_to_history=check_if_pastevents(line_copy);
-        if(flag_add_to_history)
-            add_command(line_copy);
+        // int flag_add_to_history=0;
+        // flag_add_to_history=check_if_pastevents(line_copy);
+        // if(flag_add_to_history)
+        //     add_command(line_copy);
 
         char **commands_separated_by_semicolon = sh_extract_commands(line);
 

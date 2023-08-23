@@ -135,12 +135,11 @@ int foreground(char **args)
 
     pid_t pid = fork();
     if (pid < 0)
-        {
-            perror(MAG);
-            perror("Couldn't make a foreground fork of process!");
-            perror(COL_RESET);
-        }
-      
+    {
+        perror(MAG);
+        perror("Couldn't make a foreground fork of process!");
+        perror(COL_RESET);
+    }
 
     if (pid == 0)
     {
@@ -171,23 +170,51 @@ void add_to_list_bg(bg_process *new)
     return;
 }
 
+void sigusr1_handler_function(int sig)
+{
+    int status;
+    int pid;
+
+    // Wait for child process to terminate and get its exit status
+    while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
+    {
+        if (pid < 0)
+        {
+            // perror("waitpid");
+            break;
+        }
+
+        bg_process *temp = Head_bg->next;
+        while (temp != NULL)
+        {
+            if (temp->pid == pid)
+                temp->status = status;
+            temp = temp->next;
+        }
+    }
+}
 int background(char **args)
 {
-    signal(SIGCHLD, sigchld_handler);
+    struct sigaction sa;
+    sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+    sa.sa_handler = &sigusr1_handler_function;
+    sigaction(SIGCHLD, &sa, NULL);
+
     pid_t pid = fork();
 
     if (pid < 0)
     {
-       perror(MAG);
-            perror("Couldn't make a background fork of process!");
-            perror(COL_RESET);
+        perror(MAG);
+        perror("Couldn't make a background fork of process!");
+        perror(COL_RESET);
     }
-        
+
     if (pid == 0)
     {
 
         // setpgid(0, 0);//detach child process from parent process
 
+        // kill(getppid(),SIGCHLD);//sends signal to parent process getppid() used to get parent process id
         if (execvp(args[0], args))
         {
             printf(MAG);
@@ -198,6 +225,7 @@ int background(char **args)
     }
     else
     {
+
         ++no_of_bg;
         bg_process *new_bg_process = (bg_process *)malloc(sizeof(bg_process));
         new_bg_process->command = (char *)malloc(sizeof(char) * 1024);
@@ -374,7 +402,7 @@ int main()
         flag_add_to_history = check_if_pastevents(line_copy);
         if (flag_add_to_history)
             add_command(line_copy);
-
+        strcpy(arg_0, line_copy);
         char **commands_separated_by_semicolon = sh_extract_commands(line);
 
         int i = 0;
@@ -385,14 +413,14 @@ int main()
             i++;
             // printf("%s",commands_separated_by_semicolon[i]);
             // printf("%s",tokens[0]);
-            int j = 0;
+            // int j = 0;
             if (tokens[0] != NULL) // no command
             {
-                if (j == 0)
-                {
-                    strcpy(arg_0, tokens[0]);
-                    j = 1;
-                }
+                // if (j == 0)
+                // {
+
+                //     j = 1;
+                // }
 
                 sh_exec(tokens, line_copy);
             }

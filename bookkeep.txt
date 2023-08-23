@@ -1,16 +1,16 @@
 15
-sleep 3
+sleep 5;echo m
+echo m; sleep 5
+sleep 7 &
+hi
+hi;sleep 5 & ; sleep 3
+sleep 6 &
 sleep 2
+sleep 7 &
+sleep 3 &
+sleep 1
+sleep 4 &
 sleep 10 &
-sleep 10
-sleep 5
-sleep 10 7
-sleep 5 &
-sleep 3
-sleep 5
-sleep 1 &
 sleep 2
-seek -e -f prompt .
-seek -e -l prompt .
-seek -e -l makefile .
-peek -l
+sleep 10 & sleep 5 & sleep 2
+sleep 3 
