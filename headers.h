@@ -18,11 +18,12 @@
 #include <grp.h>      //to get group
 #include "pastevents.h"
 #include "prompt.h"
+#include "peek.h"
+#include "seek.h"
+#include "warp.h"
+#include "proclore.h"
 
 #define HOSTNAME_MAX 512
-#define PATHno_of_tokens_MAX 100000
-#define MAX_HIST_SIZE 20
-#define HIST_DISPLAY 10
 
 
 // Regular text
@@ -52,24 +53,6 @@ extern bg_process *Head_bg;
 extern char HOME[1024];
 extern long time_flag;
 extern char arg_0[1024];
-
-void proclore(char *pid);
-
-
-int compare_entries(const void *a, const void *b);
-void display_permissions(mode_t mode);
-void print_name(char *name, struct stat file_stat);
-int peek_print(const char *path, int show_hidden, int show_details);
-int peek(char **args);
-
-
-void print_path();
-void warp(char **args);
-
-
-int is_match(const char *name, const char *search_term);
-void search_directory(int only_files,int only_dir,const int target,const char *dir_path, const char *search_term);
-int seek( char *args[]);
 
 
 char *sh_read_line();

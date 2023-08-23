@@ -1,9 +1,4 @@
 15
-sleep 20 &
-sleep 30 &
-sleep 5
-sleep 4
-sleep 5 &
 sleep 4 &
 sleep 3 &
 sleep 2
@@ -14,3 +9,8 @@ echo "Lorem Ipsum"
 echo "Lorem Ipsum" 
 echo "Lorem Ipsum" 
 echo "Lorem Ipsum" 
+peek -l
+seek -l warp .
+warp ..
+warp -
+sleep 4
