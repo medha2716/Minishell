@@ -96,14 +96,24 @@ int seek( char *args[]) {
         printf(COL_RESET);
         return 1;
     }
-    while(args[i][0]=='-')
+    while((args[i])&&(args[i][0]=='-'))
     {
         if(strcmp(args[i],"-e")==0)
             e_flag=1;
-        else if(strcmp(args[i],"-l")==0)
+        else if(strcmp(args[i],"-f")==0)
             l_flag=1;
         else if(strcmp(args[i],"-d")==0)
             d_flag=1;
+        else if((strcmp(args[i],"-de")==0)||(strcmp(args[i],"-ed")==0))
+            {
+                d_flag=1;
+                e_flag=1;
+            }
+         else if((strcmp(args[i],"-fe")==0)||(strcmp(args[i],"-ef")==0))
+            {
+                l_flag=1;
+                e_flag=1;
+            }
         else
             {
                 printf(MAG);
@@ -112,6 +122,14 @@ int seek( char *args[]) {
                 return 1;
             }
         i++;
+    }
+
+     if(!args[i])
+     {
+        printf(MAG);
+        printf("seek: less arguments than required\n");
+        printf(COL_RESET);
+        return 1;
     }
     
     if(d_flag && l_flag)
@@ -125,8 +143,6 @@ int seek( char *args[]) {
     //tackling target directory
     char *target_directory=(char*)malloc(sizeof(char)*1024);
     if(args[i+1])
-     
-    
    { 
     strcat(target_directory, "/");
     char delimit[] = "/"; // delimitors are /
@@ -175,6 +191,7 @@ int seek( char *args[]) {
     
 
     //actual part
+   
     const char *search_term = args[i];
     total_finds=0;
     search_directory(l_flag,d_flag,strlen(target_directory),target_directory, search_term);
