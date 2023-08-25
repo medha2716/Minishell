@@ -1,16 +1,14 @@
-15
-warp
-warp
-sleep 10
+13
+hola
+hola
+sleep 1
+sleep 1
+help
+help
+what
+what
+proclore
 sleep 5 &
-echo pearl
-sleep 10 &
 sleep 5 &
-sleep 3 &
-sleep 2
-seek -e try ..
-seek try ..
-warp ..
-seek -e try
-seek try ../
-seek try ..
+hi
+peek -

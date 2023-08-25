@@ -21,16 +21,16 @@ void proclore(char *pid)
     }
 
     // Read the required information from the stat file
-    char *stat_buf = calloc(100000, sizeof(char));
+    char *stat_buf = calloc(100001, sizeof(char));
     assert(stat_buf != NULL);
     fread(stat_buf, 1, 100000, stat_file);
 
     fclose(stat_file);
 
-    printf("%s\n", stat_buf);
+    // printf("%s\n", stat_buf);
     int no_of_tokens = 0;
     char **tokens = malloc(40 * sizeof(char *)); // array of tokens
-
+    int tokens_array_size=40;
     char *delimiters = " ";
     char *token = strtok(stat_buf, delimiters);
 
@@ -38,6 +38,12 @@ void proclore(char *pid)
     {
         tokens[no_of_tokens] = token;
         no_of_tokens++;
+
+           if (no_of_tokens >= tokens_array_size)
+        {
+            tokens_array_size = (int)(tokens_array_size * 2);
+            tokens = realloc(tokens, tokens_array_size * sizeof(char *));
+        }
 
         token = strtok(NULL, delimiters);
     }
@@ -47,7 +53,7 @@ void proclore(char *pid)
     strcpy(status, tokens[2]);
     pgroup = atoi(tokens[4]);
     vmemory = atoi(tokens[22]);
-
+    int tty_nr=atoi(tokens[6]); //contolling terminal's minor device number
     // Generate the path to the exe link for the given PID
     snprintf(stat_path, sizeof(stat_path), "/proc/%s/exe", pid);
 
@@ -66,10 +72,9 @@ void proclore(char *pid)
     }
 
     //
-    
-    int terminal_foreground_pgid = tcgetpgrp(STDIN_FILENO);
+   
 
-    // Compare the PGID with the terminal's foreground process group ID
+
     
     int pid_print;
     if (strcmp(pid, "self") == 0)
@@ -84,13 +89,14 @@ void proclore(char *pid)
     printf("pid : %d\n", pid_print);
     printf("Process Group : %d\n", pgroup);
 
-    if (pgroup == terminal_foreground_pgid)
+    int terminal_fg_pgid=tcgetpgrp(STDIN_FILENO);
+    if (pgroup==terminal_fg_pgid) //background processes are not attached to any terminal
     {
-       printf("process status +%s\n", status); // Foreground process
+       printf("process status : %s+\n", status); // Foreground process
     }
     else
     {
-        printf("process status %s\n", status); // Background process
+        printf("process status : %s\n", status); // Background process
     }
     
     
@@ -108,9 +114,10 @@ void proclore(char *pid)
  
     // free stuff up
 
-    free(stat_buf);
-    free(tokens);
+   free(tokens);
+   free(stat_buf);
 }
+   
 
 // int main() {
 //     // int pid = getpid(); // Replace with the PID you want to inspect

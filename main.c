@@ -66,7 +66,7 @@ char **sh_extract_commands(char *line) // tokens in this are entire commands not
     while (token != NULL)
     {
         pos += strlen(token) + 1;
-        char *str = (char *)malloc(strlen(stor_line) + 1);
+        char *str = (char *)calloc(strlen(stor_line) + 1, sizeof(char));
         //    printf("%s%d ",token,pos);
         if (pos < strlen(stor_line))
         {
@@ -122,7 +122,6 @@ int foreground(char **args)
             printf(COL_RESET);
             return 1; // what if arguments are the problem?
         }
-        printf("%s %s\n", args[0], args[1]);
     }
     else
     {
@@ -190,13 +189,14 @@ int background(char **args)
 
 void remove_bg_list(bg_process *temp)
 {
+
     bg_process *next = temp->next;
     bg_process *prev = temp->prev;
-    if (next)
+    if (next != NULL)
         next->prev = prev;
-    if (prev)
+    if (prev != NULL)
         prev->next = next;
-    free(temp);
+
     return;
 }
 
@@ -242,7 +242,7 @@ void check_bg_if_ended()
 void sh_exec(char **args, char *line_execute_pastevnts)
 {
     int i = 0;
-    char **args_bg = (char **)malloc(5000 * sizeof(char *));
+
     if (strcmp("warp", args[i]) == 0)
     {
 
@@ -271,12 +271,12 @@ void sh_exec(char **args, char *line_execute_pastevnts)
             else
             {
                 int pos = atoi(args[2]);
-                if(pos < 1)
+                if (pos < 1)
                 {
                     printf(MAG);
                     printf("ERROR: pastevents: No command at entered position!\n");
                     printf(COL_RESET);
-                    return ;
+                    return;
                 }
                 // printf("%d\n",pos);
                 execute_command(pos, line_execute_pastevnts);
@@ -310,16 +310,22 @@ void sh_exec(char **args, char *line_execute_pastevnts)
         }
         if (strcmp(args[i - 1], "&") == 0)
         {
-            // args[i-1]=NULL;
+
+            args[i - 1] = NULL;
             // printf("%s %s\n",args[0],args[1]);
+            char **args_bg = (char **)calloc(5000, sizeof(char *));
             for (int j = 0; j < (i - 1); j++)
             {
-                args_bg[j] = (char *)malloc(sizeof(char) * 5000);
+                args_bg[j] = (char *)calloc(5000, sizeof(char));
                 strcpy(args_bg[j], args[j]);
             }
             args_bg[i - 1] = NULL;
             background(args_bg);
             // printf("execute %s %s as background process\n", args[0], args[1]);
+            for (int j = 0; j < (i - 1); j++)
+            {
+                free(args_bg[j]);
+            }
             free(args_bg);
         }
         else
@@ -355,7 +361,9 @@ int main()
         // PASTEVENTS HISTORY!!!!!!!!!
         char line_copy[5000];
         strcpy(line_copy, line);
+
         line_copy[strlen(line_copy) - 1] = '\0';
+
         int flag_add_to_history = 0;
         flag_add_to_history = check_if_pastevents(line_copy);
         if (flag_add_to_history)

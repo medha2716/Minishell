@@ -79,6 +79,7 @@ int add_command(char *command)
     }
     int currCount;
     fscanf(rfile, "%d", &currCount);
+    fclose(rfile);
     if (currCount == 15)
     {
         remove_oldest_command();
@@ -86,26 +87,35 @@ int add_command(char *command)
     }
 
     // Check if the command is the same as the last command in history
-    char lastCommand[5000];
-    fseek(rfile, -2, SEEK_END); // Move before the last newline character
-    while (ftell(rfile) > 0)
+    rfile = fopen(bkpath, "r+");
+    if (!rfile)
     {
-        char ch = fgetc(rfile);
-        if (ch == '\n')
-        {
-            break;
-        }
-        fseek(rfile, -2, SEEK_CUR);
+        printf(MAG);
+        printf("Error opening pastevents file\n");
+        printf(COL_RESET);
+        return 1;
     }
-    fgets(lastCommand, sizeof(lastCommand), rfile);
+    char lastCommand[5000];
+    // char lCommand[5000];
+
+    char line[5000];
+                int no = 1;
+                while (fgets(line, sizeof(line), rfile))
+                {
+                    if (no == (currCount+1))
+                    {
+                       break;
+                    }
+                    no++;
+                }
+    
     char currCommand[5000];
     strcat(currCommand, command);
-    strcat(currCommand, "\n");
-    // printf("%s %s\n",lastCommand,currCommand);
-    // if (strcmp(lastCommand, currCommand) == 0)
-    //     printf("same shit\n");
+    strcat(currCommand,"\n");
 
-    if (strcmp(lastCommand, currCommand) != 0)
+   
+    
+    if (strcmp(line, currCommand) != 0)
     {
         // beginning of file
         if (fseek(rfile, 0, SEEK_SET) != 0)
@@ -121,11 +131,18 @@ int add_command(char *command)
         append_command = 1;
     }
 
+    if (strcmp(line, currCommand) == 0)
+    {
+        append_command=0;
+    }
+    
+
     //
     fclose(rfile);
 
     if (append_command == 1)
     { // Write(append) commands to the file
+        
         FILE *wfile = fopen(bkpath, "a");
         if (!wfile)
         {
