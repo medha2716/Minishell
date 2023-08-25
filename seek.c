@@ -165,11 +165,22 @@ int seek( char *args[]) {
             strcat(target_directory, HOME);
             strcat(target_directory, "/");
         }
-        if (strcmp(place, ".") == 0)
+        else if (strcmp(place, ".") == 0)
         {
             char curr_dir[PATH_MAX];
             getcwd(curr_dir,sizeof(curr_dir));
                strcat(target_directory, curr_dir);
+            strcat(target_directory, "/");
+        }
+        else if(strcmp(place, "..") == 0)
+        {
+            char curr_dir[PATH_MAX];
+            char parent_dir[PATH_MAX];
+            getcwd(curr_dir,sizeof(curr_dir));
+            chdir("..");
+            getcwd(parent_dir,sizeof(parent_dir));
+            chdir(curr_dir);
+            strcat(target_directory, parent_dir);
             strcat(target_directory, "/");
         }
         else
@@ -215,14 +226,38 @@ int seek( char *args[]) {
                 perror(COL_RESET);
                 return 1;
             }
+
+
+  
             if (S_ISDIR(entry_stat.st_mode))
             {
                 // printf("only dir\n");
-                chdir(e_path);
+                if((entry_stat.st_mode & S_IXUSR) && (entry_stat.st_mode & S_IXGRP) && (entry_stat.st_mode & S_IXOTH))
+                {
+                    if(chdir(e_path)!= 0)
+                    perror(MAG);
+                    perror("warp: ");
+                    perror(COL_RESET);
+                    return 1;
+                }   
+                else
+                {
+                    printf(MAG);
+                    printf("Missing permissions for task!\n");
+                    printf(COL_RESET);
+                    return 1;
+                }
             }
             else
-            {
+            {   
                 //read file content
+                 if(!((entry_stat.st_mode & S_IRUSR) && (entry_stat.st_mode & S_IRGRP) && (entry_stat.st_mode & S_IROTH)))
+                {
+                    printf(MAG);
+                    printf("Missing permissions for task!\n");
+                    printf(COL_RESET);
+                    return 1;
+                }   
                 FILE *rfile = fopen(e_path, "r");
                 if (!rfile)
                 {
