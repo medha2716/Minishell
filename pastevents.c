@@ -274,13 +274,22 @@ char *add_to_history(char *initial)
             // printf("%s\n",idx);
             if (idx != NULL)
             {
+                if(atoi(idx)<1)
+                {
+                    i++;
+                    continue;
+                }
                 int pos = currCount - atoi(idx) + 2;
+                if (atoi(idx) > currCount)
+                {
+                    i++;
+                    continue;
+                }
                 // printf("%d\n", pos);
                 char line[5000];
                 int no = 1;
                 while (fgets(line, sizeof(line), read_file))
                 {
-
                     if (no == pos)
                     {
                         // printf("%s", line); // dont print but execute but for now do this
@@ -291,12 +300,13 @@ char *add_to_history(char *initial)
                     no++;
                 }
             }
+            
             fseek(read_file, 0, SEEK_SET);
             free(idx);
         }
         i++;
     }
-    final[idx_final-1] = '\0';
+    final[idx_final - 1] = '\0';
     fclose(read_file);
     return final;
 }
@@ -304,7 +314,7 @@ char *add_to_history(char *initial)
 int execute_command(int command_position, char *to_be_added)
 {
     // add after exec of all pastevents execute is done
-
+   
     char bkpath[PATH_MAX];
     strcpy(bkpath, HOME);
     strcat(bkpath, "/");
@@ -320,6 +330,14 @@ int execute_command(int command_position, char *to_be_added)
     int currCount;
     fscanf(read_file, "%d", &currCount);
     int pos = currCount - command_position + 2;
+    if (command_position > currCount)
+    {
+        printf(MAG);
+        printf("ERROR: pastevents: No command at entered position!\n");
+        printf(COL_RESET);
+        fclose(read_file);
+        return 1;
+    }
     // printf("%d\n",pos);
     char line[5000];
     int i = 1;

@@ -10,3 +10,5 @@ for foreground processes, time of entire process including differents commands s
 
 
 seek -e missing permissions wala error
+
+if invalid position given pastevents execute not stored in pastvents

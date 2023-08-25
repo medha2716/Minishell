@@ -1,16 +1,16 @@
 15
-echo "Lorem Ipsum" 
-peek -l
-seek -l warp .
-warp ..
-warp -
-sleep 4
-seek -l
-seek -l
-seek -l
-seek -l
-seek -f -e seek
-seek -ef seek
 seek -fe prompt
 seek -d -f prompt
 ./a.out
+
+seek 
+peek
+warp
+warp
+sleep 10
+sleep 5 &
+echo pearl
+sleep 10 &
+sleep 5 &
+sleep 3 &
+sleep 2

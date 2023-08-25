@@ -271,6 +271,13 @@ void sh_exec(char **args, char *line_execute_pastevnts)
             else
             {
                 int pos = atoi(args[2]);
+                if(pos < 1)
+                {
+                    printf(MAG);
+                    printf("ERROR: pastevents: No command at entered position!\n");
+                    printf(COL_RESET);
+                    return ;
+                }
                 // printf("%d\n",pos);
                 execute_command(pos, line_execute_pastevnts);
             }

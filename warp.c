@@ -15,9 +15,9 @@ void warp(char **args) // what happens if warp - in the very beginning??
     if (args[1] == NULL)
     {
         // printf("hi");
-        struct passwd *pw = getpwuid(getuid()); // HOME
+        
 
-        if (chdir(pw->pw_dir) != 0)
+        if (chdir(HOME) != 0)
         {
             perror(MAG);
             perror("warp: ");
