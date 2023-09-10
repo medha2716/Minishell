@@ -3,6 +3,7 @@
 
 #include <unistd.h> // For geteuid()
 #include <sys/types.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include <signal.h> //for kill
 #include <pwd.h> // For getpwuid()
@@ -36,6 +37,7 @@
 #define CYN "\e[0;36m"
 #define WHT "\e[0;37m"
 #define GREY "\x1B[90m"
+#define PNK "\x1b[38;5;206m"
 #define COL_RESET "\x1B[0m"
 
 typedef struct bg_process
@@ -53,6 +55,7 @@ extern bg_process *Head_bg;
 extern char HOME[1024];
 extern long time_flag;
 extern char arg_0[1024];
+extern int foreground_running_pid;
 
 
 char *sh_read_line();
@@ -65,4 +68,22 @@ void remove_bg_list(bg_process *temp);
 void check_bg_if_ended();
 void sh_exec(char **args,char* line_execute_pastevnts);
 
+void redirect(char** args);
+void redirect_io(char *input_file, char *output_file, int append);
+
+
+int fg(char *argv[]);
+int bg(char *argv[]);
+
+void activities();
+
+int ping(char** args);
+void kill_bg();
+
+void  SIGINT_handler(int); 
+void  SIGTSTP_handler(int sig);
+
 #endif
+//  int saved_stdout = dup(1);
+//     int saved_stdin = dup(0);
+//     int saved_stderr = dup(STDERR_FILENO);

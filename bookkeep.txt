@@ -1,14 +1,3 @@
-13
-hola
-hola
-sleep 1
-sleep 1
-help
-help
-what
-what
-proclore
-sleep 5 &
-sleep 5 &
-hi
-peek -
+15
+echo hi
+bg 54531

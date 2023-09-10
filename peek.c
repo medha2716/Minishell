@@ -60,7 +60,7 @@ void print_name(char *name, struct stat file_stat)
 }
 int peek_print(const char *path, int show_hidden, int show_details)
 {
-
+    
     struct dirent *entry;
     struct dirent **entry_list = (struct dirent **)malloc(sizeof(struct dirent *) * 7000); // assuming max 7000 files in a directory
     DIR *dir = opendir(path);
@@ -82,6 +82,7 @@ int peek_print(const char *path, int show_hidden, int show_details)
 
     for (int j = 0; j < no_of_entries; j++)
     {
+        
         if (show_hidden == 0) //-a flag not used
         {
             if (entry_list[j]->d_name[0] == '.') // file is hidden
@@ -237,5 +238,7 @@ int peek(char **args)
     }
     path[strlen(path) - 1] = '\0';
     peek_print(path, show_hidden, show_details);
+    
     return 0;
+    
 }
