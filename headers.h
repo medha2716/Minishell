@@ -71,7 +71,7 @@ void remove_bg_list(bg_process *temp);
 void check_bg_if_ended();
 void sh_exec(char **args,char* line_execute_pastevnts);
 
-void redirect(char** args);
+void redirect(char *input);
 void redirect_io(char *input_file, char *output_file, int append);
 
 
@@ -88,6 +88,11 @@ void  SIGINT_handler(int);
 void  SIGTSTP_handler(int sig);
 
 int pipes(char* input_line);
+char **split_line(char *line);
+char **extract_commands(char *line);
+void execute_why(char **argv);
+
+void spec11(char *input_line);
 
 
 #endif

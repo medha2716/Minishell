@@ -1,2 +1,2 @@
 15
-ls -l | wc
+git commit -m "piping works"

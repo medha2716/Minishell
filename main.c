@@ -179,8 +179,6 @@ void SIGINT_handler(int sig)
 void SIGTSTP_handler(int sig)
 {
 
-   
-
     if ((foreground_running_pid > 0) && (kill(foreground_running_pid, 0) == 0))
     {
         printf(PNK);
@@ -206,7 +204,6 @@ void SIGTSTP_handler(int sig)
         //     exit(EXIT_FAILURE);
         // }
 
-    
         ++no_of_bg;
         bg_process *new_bg_process = (bg_process *)malloc(sizeof(bg_process));
         new_bg_process->command = (char *)malloc(sizeof(char) * 5000);
@@ -217,7 +214,6 @@ void SIGTSTP_handler(int sig)
         new_bg_process->status = -100;
         add_to_list_bg(new_bg_process);
         printf("[%d] %d\n", no_of_bg, foreground_running_pid);
-
 
         foreground_running_pid = -1;
     }
@@ -482,7 +478,7 @@ int main()
     Head_bg->command = "START_DUMMY";
 
     getcwd(HOME, sizeof(HOME));
-   
+
     // shell is a loop that accepts commands
 
     while (1)
@@ -526,30 +522,41 @@ int main()
 
         while (commands_separated_by_semicolon[i] != NULL)
         {
-            // char **tokens = sh_split_line(commands_separated_by_semicolon[i]); // specification 2
-            
-            // redirect(commands_separated_by_semicolon[i]);
-            
-            if ((strstr(commands_separated_by_semicolon[i], ">") == NULL) && (strstr(commands_separated_by_semicolon[i], ">>") == NULL) && (strstr(commands_separated_by_semicolon[i], "|") == NULL) && (strstr(commands_separated_by_semicolon[i], "<") == NULL))
-            {
-                char **tokens = sh_split_line(commands_separated_by_semicolon[i]); // specification 2
 
-                i++;
-                if (tokens[0] != NULL) // no command
+            if ((strstr(commands_separated_by_semicolon[i], "|") == NULL))
+            {
+
+
+                if ((strstr(commands_separated_by_semicolon[i], ">") != NULL) || (strstr(commands_separated_by_semicolon[i], ">>") != NULL) || (strstr(commands_separated_by_semicolon[i], "<") != NULL))
                 {
-                    sh_exec(tokens, line_copy);
-                    
+                    // char **tokens = sh_split_line(commands_separated_by_semicolon[i]);
+                    redirect(commands_separated_by_semicolon[i]);
                 }
 
-                free(tokens);// free memory before next command
+                else
+                {
+                    char **tokens = sh_split_line(commands_separated_by_semicolon[i]);
+                    
+                    if (tokens[0] != NULL) // no command
+                    {
+                        sh_exec(tokens, line_copy);
+                    }
+
+                    free(tokens); // free memory before next command
+                }
+                i++;
             }
-            else if((strstr(commands_separated_by_semicolon[i], ">") == NULL) && (strstr(commands_separated_by_semicolon[i], ">>") == NULL)  && (strstr(commands_separated_by_semicolon[i], "<") == NULL))
+            else if ((strstr(commands_separated_by_semicolon[i], ">") == NULL) && (strstr(commands_separated_by_semicolon[i], ">>") == NULL) && (strstr(commands_separated_by_semicolon[i], "<") == NULL))
             {
                 pipes(commands_separated_by_semicolon[i]);
-                i++; //this is a very important statement; please make sure you never make this mistake :)
+                i++; // this is a very important statement; please make sure you never make this mistake :)
             }
-
-        } 
+            else
+            {
+                spec11(commands_separated_by_semicolon[i]);
+                i++;
+            }
+        }
         long end_of_process = time(NULL);
         time_flag = end_of_process - start_of_process;
         char *result = strstr(line_copy, "pastevents execute");
