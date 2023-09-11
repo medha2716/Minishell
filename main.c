@@ -543,7 +543,7 @@ int main()
 
                 free(tokens);// free memory before next command
             }
-            else
+            else if((strstr(commands_separated_by_semicolon[i], ">") == NULL) && (strstr(commands_separated_by_semicolon[i], ">>") == NULL)  && (strstr(commands_separated_by_semicolon[i], "<") == NULL))
             {
                 pipes(commands_separated_by_semicolon[i]);
                 i++; //this is a very important statement; please make sure you never make this mistake :)

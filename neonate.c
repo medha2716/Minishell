@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <fcntl.h>
+#include <assert.h>
 
 void die(const char *s)
 {
@@ -49,8 +50,58 @@ void enableRawMode()
  * Backspace move the cursor one control character to the left
  * @return
  */
+int get_pid()
+{
+
+    // Open the loadavg file
+    FILE *loadavg_file = fopen("/proc/loadavg", "r");
+    if (!loadavg_file)
+    {
+        // perror(MAG);
+        perror("Error opening loadavg file");
+        // perror(COL_RESET);
+        return;
+    }
+
+    // Read the required information from the loadavg file
+    char *loadavg_buf = calloc(100001, sizeof(char));
+    assert(loadavg_buf != NULL);
+    fread(loadavg_buf, 1, 100000, loadavg_file);
+
+    fclose(loadavg_file);
+
+    // printf("%s\n", loadavg_buf);
+    int no_of_tokens = 0;
+    char **tokens = malloc(40 * sizeof(char *)); // array of tokens
+    int tokens_array_size=40;
+    char *delimiters = " ";
+    char *token = strtok(loadavg_buf, delimiters);
+
+    while (token != NULL)
+    {
+        tokens[no_of_tokens] = token;
+        no_of_tokens++;
+
+           if (no_of_tokens >= tokens_array_size)
+        {
+            tokens_array_size = (int)(tokens_array_size * 2);
+            tokens = realloc(tokens, tokens_array_size * sizeof(char *));
+        }
+
+        token = strtok(NULL, delimiters);
+    }
+
+    tokens[no_of_tokens] = NULL;
+
+    return atoi(tokens[4]);
+}
 int main()
-{ // 21 in proc/pid/stat
+{   // The fifth field is the PID of the process that was most recently created on the system.
+    //in proc/loadavg
+    //# cat /proc/loadavg (input)
+    //0.75 0.35 0.25 1/25 1747 (output)
+    //here 1747 is the pid
+    int recent_pid=get_pid();
     int delay;
     printf("Enter time delay: ");
     scanf("%d", &delay);
@@ -63,7 +114,7 @@ int main()
 
     while (1)
     {
-        printf("Prompt>\n");
+        printf("%d\n",recent_pid);
 
         // Check if 'x' key is entered
         if (read(STDIN_FILENO, &c, 1) == 1 && c == 'x')
