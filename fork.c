@@ -1,6 +1,5 @@
 #include "headers.h"
 
-
 void redirect_io(char *input_file, char *output_file, int append)
 {
     int input_fd, output_fd;
@@ -17,7 +16,7 @@ void redirect_io(char *input_file, char *output_file, int append)
             return;
         }
         dup2(input_fd, STDIN_FILENO);
-        
+
         close(input_fd);
     }
 
@@ -51,239 +50,111 @@ void redirect(char **args)
     char *input_file = NULL;
     char *output_file = NULL;
     int append = 0;
-   
 
     // Check for redirection operators
-    int i=0;
-    while(args[i]!=NULL)
-{
-    if (strcmp(args[i], ">>")==0)
+    int i = 0;
+    while (args[i] != NULL)
     {
-        append = 1;
-        output_file = args[i+1];
+        if (strcmp(args[i], ">>") == 0)
+        {
+            append = 1;
+            output_file = args[i + 1];
+        }
+        else if (strcmp(args[i], ">") == 0)
+        {
+            append = 0;
+            output_file = args[i + 1];
+        }
+        else
+        {
+            append = 0;
+            output_file = NULL;
+        }
+        if (strcmp(args[i], "<") == 0)
+        {
 
+            input_file = args[i + 1];
+        }
+        i++;
+    }
+    // Tokenize the command
+
+    // Fork and execute the command
+
+    // Child process
+    redirect_io(input_file, output_file, append);
+    char **argv = (char **)malloc(4096 * sizeof(char *));
+    for (int i = 0; args[i] != NULL; i++)
+    {
+        if ((strcmp(args[i], ">>") == 0) || (strcmp(args[i], ">") == 0) || (strcmp(args[i], "<") == 0))
+            break;
+        argv[i] = args[i];
+    }
+    if (strcmp("peek", argv[0]) == 0)
+    {
+        peek(argv);
         
     }
-    else if (strcmp(args[i], ">")==0)
+    else if (strcmp("warp", argv[0]) == 0)
     {
-        append = 0;
-        output_file = args[i+1];
+
+        warp(argv); // if return with error dont add to history
+       
+    }
+    else if (strcmp("proclore", argv[0]) == 0)
+    {
+        if (!argv[1])
+            proclore("self");
+        else
+        {
+            proclore(argv[1]);
+        }
+        
+    }
+    else if ((strcmp("pastevents", argv[0]) == 0) && (argv[1]))
+    {
+        if (strcmp("purge", argv[1]) == 0)
+            pastevents_purge();
+        
+    }
+    else if (strcmp("pastevents", argv[0]) == 0)
+    {
+       
+        read_command();  
+      
+    }
+    else if (strcmp("seek", argv[0]) == 0)
+    {
+        seek(argv);
+        
+    }
+    else if (strcmp("fg", argv[0]) == 0)
+    {
+        fg(argv);
+       
+    }
+    else if (strcmp("bg", argv[0]) == 0)
+    {
+        bg(argv);
+       
+    }
+    else if (strcmp("activities", argv[0]) == 0)
+    {
+        activities();
+       
+    }
+    else if (strcmp("ping", argv[0]) == 0)
+    {
+        ping(argv);
         
     }
     else
     {
-        append = 0;
-        output_file = NULL;
+        execvp(argv[0], argv);
+        // sh_exec(args,input);
+        perror(MAG);
+        perror("execvp");
+        perror(COL_RESET);
     }
-    if (strcmp(args[i], "<")==0)
-    {
-        
-        input_file = args[i+1];
-    }
-    i++;
-}
-    // Tokenize the command
-
-    
-
-    // Fork and execute the command
-   
-        // Child process
-        redirect_io(input_file, output_file, append);
-        char** argv=(char**)malloc(4096*sizeof(char*));
-        for(int i=0;args[i]!=NULL;i++)
-        {
-            if((strcmp(args[i], ">>")==0)||(strcmp(args[i], ">")==0)||(strcmp(args[i], "<")==0))
-                break;
-            argv[i]=args[i];
-        }
-        // if (strcmp("peek", args[0]) == 0)
-        // {
-        //     peek(args);
-        //     if (output_file != NULL)
-        //     {
-        //         dup2(saved_stdout, 1);
-        //         close(saved_stdout);
-        //         dup2(saved_stderr, STDERR_FILENO);
-        //         close(saved_stderr);
-        //     }
-
-        //     if (input_file != NULL)
-        //     {
-        //         dup2(saved_stdin, 0);
-        //         close(saved_stdin);
-        //     }
-        // }
-        // else if (strcmp("warp", args[0]) == 0)
-        // {
-
-        //     warp(args); // if return with error dont add to history
-        //     if (output_file != NULL)
-        //     {
-        //         dup2(saved_stdout, 1);
-        //         close(saved_stdout);
-        //         dup2(saved_stderr, STDERR_FILENO);
-        //         close(saved_stderr);
-        //     }
-
-        //     if (input_file != NULL)
-        //     {
-        //         dup2(saved_stdin, 0);
-        //         close(saved_stdin);
-        //     }
-        // }
-        // else if (strcmp("proclore", args[0]) == 0)
-        // {
-        //     if (!args[1])
-        //         proclore("self");
-        //     else
-        //     {
-        //         proclore(args[1]);
-        //     }
-        //     if (output_file != NULL)
-        //     {
-        //         dup2(saved_stdout, 1);
-        //         close(saved_stdout);
-        //         dup2(saved_stderr, STDERR_FILENO);
-        //         close(saved_stderr);
-        //     }
-
-        //     if (input_file != NULL)
-        //     {
-        //         dup2(saved_stdin, 0);
-        //         close(saved_stdin);
-        //     }
-        // }
-        // else if ((strcmp("pastevents", args[0]) == 0) && (args[1]))
-        // {
-        //     if (strcmp("purge", args[1]) == 0)
-        //         pastevents_purge();
-        //     if (output_file != NULL)
-        //     {
-        //         dup2(saved_stdout, 1);
-        //         close(saved_stdout);
-        //         dup2(saved_stderr, STDERR_FILENO);
-        //         close(saved_stderr);
-        //     }
-
-        //     if (input_file != NULL)
-        //     {
-        //         dup2(saved_stdin, 0);
-        //         close(saved_stdin);
-        //     }
-        // }
-        // else if (strcmp("pastevents", args[0]) == 0)
-        // {
-        //     read_command();
-        //     if (output_file != NULL)
-        //     {
-        //         dup2(saved_stdout, 1);
-        //         close(saved_stdout);
-        //         dup2(saved_stderr, STDERR_FILENO);
-        //         close(saved_stderr);
-        //     }
-
-        //     if (input_file != NULL)
-        //     {
-        //         dup2(saved_stdin, 0);
-        //         close(saved_stdin);
-        //     }
-        // }
-        // else if (strcmp("seek", args[0]) == 0)
-        // {
-        //     seek(args);
-        //     if (output_file != NULL)
-        //     {
-        //         dup2(saved_stdout, 1);
-        //         close(saved_stdout);
-        //         dup2(saved_stderr, STDERR_FILENO);
-        //         close(saved_stderr);
-        //     }
-
-        //     if (input_file != NULL)
-        //     {
-        //         dup2(saved_stdin, 0);
-        //         close(saved_stdin);
-        //     }
-        // }
-        // else if(strcmp("fg", args[0]) == 0)
-        // {
-        //     fg(args);
-        //     if (output_file != NULL)
-        //     {
-        //         dup2(saved_stdout, 1);
-        //         close(saved_stdout);
-        //         dup2(saved_stderr, STDERR_FILENO);
-        //         close(saved_stderr);
-        //     }
-
-        //     if (input_file != NULL)
-        //     {
-        //         dup2(saved_stdin, 0);
-        //         close(saved_stdin);
-        //     }
-        // }
-        // else if(strcmp("bg", args[0]) == 0)
-        // {
-        //     bg(args);
-        //     if (output_file != NULL)
-        //     {
-        //         dup2(saved_stdout, 1);
-        //         close(saved_stdout);
-        //         dup2(saved_stderr, STDERR_FILENO);
-        //         close(saved_stderr);
-        //     }
-
-        //     if (input_file != NULL)
-        //     {
-        //         dup2(saved_stdin, 0);
-        //         close(saved_stdin);
-        //     }
-        // }
-        // else if(strcmp("activities", args[0]) == 0)
-        // {
-        //     activities();
-        //     if (output_file != NULL)
-        //     {
-        //         dup2(saved_stdout, 1);
-        //         close(saved_stdout);
-        //         dup2(saved_stderr, STDERR_FILENO);
-        //         close(saved_stderr);
-        //     }
-
-        //     if (input_file != NULL)
-        //     {
-        //         dup2(saved_stdin, 0);
-        //         close(saved_stdin);
-        //     }
-        // }
-        // else if(strcmp("ping", args[0]) == 0)
-        // {
-        //     ping(args);
-        //     if (output_file != NULL)
-        //     {
-        //         dup2(saved_stdout, 1);
-        //         close(saved_stdout);
-        //         dup2(saved_stderr, STDERR_FILENO);
-        //         close(saved_stderr);
-        //     }
-
-        //     if (input_file != NULL)
-        //     {
-        //         dup2(saved_stdin, 0);
-        //         close(saved_stdin);
-        //     }
-        // }
-        // else
-        // {
-            
-            execvp(argv[0], argv);
-            // sh_exec(args,input);
-            perror(MAG);
-            perror("execvp");
-            perror(COL_RESET);
-
-          
-        
-    
+    free(argv);
 }

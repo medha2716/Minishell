@@ -13,7 +13,7 @@ void activities() {
                 char pid_str[256];
                 sprintf(pid_str, "%d", temp->pid);
                 // Get the process state
-                char stat_file[256];
+                char stat_file[1024];
                 snprintf(stat_file, sizeof(stat_file), "/proc/%s/stat", pid_str);
 
                 FILE *stat_file_ptr = fopen(stat_file, "r");
@@ -23,17 +23,17 @@ void activities() {
                     fclose(stat_file_ptr);
                     const char *state_str;
                     // Map the state code to "running" or "stopped"
-                    if(state == 'R')
-                        state_str =  "running";
-                    else if(state == 'T')
+                    if(state == 'T')
                         state_str =  "stopped";
-                    else
-                        return; //don't print in activities if process killed
+                    else 
+                        state_str =  "running";
+                     //don't print in activities if process killed
 
                     // Print the formatted entry
                     printf("[%d] : [%s] - [%s]\n", temp->pid, temp->command, state_str);
                 }
             }
+            temp=temp->next;
         }
     }
 

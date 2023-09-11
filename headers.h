@@ -56,6 +56,9 @@ extern char HOME[1024];
 extern long time_flag;
 extern char arg_0[1024];
 extern int foreground_running_pid;
+extern int saved_stdout; 
+extern int saved_stdin;
+extern int saved_stderr;
 
 
 char *sh_read_line();
@@ -79,11 +82,13 @@ void activities();
 
 int ping(char** args);
 void kill_bg();
+void ignore_promptprint();
 
 void  SIGINT_handler(int); 
 void  SIGTSTP_handler(int sig);
 
+int pipes(char* input_line);
+
+
 #endif
-//  int saved_stdout = dup(1);
-//     int saved_stdin = dup(0);
-//     int saved_stderr = dup(STDERR_FILENO);
+// 

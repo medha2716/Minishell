@@ -7,8 +7,9 @@ char HOME[1024];
 long time_flag;
 char arg_0[1024];
 int foreground_running_pid;
-
-
+int saved_stdout;
+int saved_stdin;
+int saved_stderr;
 
 char *sh_read_line()
 {
@@ -17,10 +18,12 @@ char *sh_read_line()
     size_t buflen = 0; // The buflen variable is used to store the size of the buffer allocated by the getline function to hold the input line. When you pass a pointer to buflen to the getline function, the function will update the value of buflen to reflect the actual size of the allocated buffer.
 
     ssize_t chars_read = getline(&line, &buflen, stdin);
-    
-    if (chars_read == -1) {
-        
-        if (feof(stdin)) {
+
+    if (chars_read == -1)
+    {
+
+        if (feof(stdin))
+        {
             // Ctrl+D (EOF) detected
             free(line);
             printf(PNK);
@@ -28,15 +31,15 @@ char *sh_read_line()
             printf(COL_RESET);
             kill_bg();
             exit(0);
-        } 
-        else {
+        }
+        else
+        {
             // An error occurred while reading input
             printf(MAG);
             printf("An error occurred while reading input.\n");
             printf(COL_RESET);
         }
     }
-    
 
     return line;
 }
@@ -126,7 +129,7 @@ int foreground(char **args)
     // struct sigaction sa;
     // sa.sa_handler = SIGINT_handler;
 
-    foreground_running_pid=pid;
+    foreground_running_pid = pid;
     if (pid < 0)
     {
         perror(MAG);
@@ -136,7 +139,7 @@ int foreground(char **args)
 
     if (pid == 0)
     {
-        
+
         if (execvp(args[0], args))
         {
             printf(MAG);
@@ -149,40 +152,61 @@ int foreground(char **args)
     {
         // sigaction(SIGINT, &sa, NULL);
         int status;
-        waitpid(pid, &status, WUNTRACED);//waits till process stops or terminates
+        waitpid(pid, &status, WUNTRACED); // waits till process stops or terminates
         // printf("hi\n");
     }
 
     return 0;
 }
 
-void  SIGINT_handler(int sig)
+void SIGINT_handler(int sig)
 {
 
-      if ((foreground_running_pid>0) && (kill(foreground_running_pid, 0) == 0)) {
+    if ((foreground_running_pid > 0) && (kill(foreground_running_pid, 0) == 0))
+    {
         printf(PNK);
         printf("Received Ctrl+C. Sending SIGINT to the foreground process...\n");
         printf(COL_RESET);
         kill(foreground_running_pid, SIGINT);
-        foreground_running_pid=-1;
+        foreground_running_pid = -1;
     }
-    else if(foreground_running_pid<0)
-    {  
+    else if (foreground_running_pid < 0)
+    {
         signal(sig, SIG_IGN);
+        ignore_promptprint();
     }
-     
 }
-void  SIGTSTP_handler(int sig)
+void SIGTSTP_handler(int sig)
 {
 
-      if ((foreground_running_pid>0) && (kill(foreground_running_pid, 0) == 0)) {
+   
+
+    if ((foreground_running_pid > 0) && (kill(foreground_running_pid, 0) == 0))
+    {
         printf(PNK);
         printf("Received Ctrl+Z. Stopping the foreground process and pushing it to the background...\n");
         printf(COL_RESET);
         kill(foreground_running_pid, SIGTSTP);
-        
-       
-         
+
+        //   if (setpgid(0, 0) < 0) {
+        //     perror("setpgid");
+        //     exit(EXIT_FAILURE);
+        // }
+
+        // Create a new session and detach from the terminal
+        // if (setsid() < 0) {
+        //     perror("setsid failed");
+        //     exit(EXIT_FAILURE);
+        // }
+
+        // Attempt to send a SIGHUP signal to the process to detach it from the terminal
+        // if (kill(foreground_running_pid, SIGHUP) < 0)
+        // {
+        //     perror("kill failed");
+        //     exit(EXIT_FAILURE);
+        // }
+
+    
         ++no_of_bg;
         bg_process *new_bg_process = (bg_process *)malloc(sizeof(bg_process));
         new_bg_process->command = (char *)malloc(sizeof(char) * 5000);
@@ -194,15 +218,14 @@ void  SIGTSTP_handler(int sig)
         add_to_list_bg(new_bg_process);
         printf("[%d] %d\n", no_of_bg, foreground_running_pid);
 
-        foreground_running_pid=-1;
 
-        
+        foreground_running_pid = -1;
     }
-    else if(foreground_running_pid<0)
-    {  
+    else if (foreground_running_pid < 0)
+    {
         signal(sig, SIG_IGN);
+        ignore_promptprint();
     }
-     
 }
 
 void add_to_list_bg(bg_process *new)
@@ -232,7 +255,8 @@ int background(char **args)
 
         // setpgid(0, 0);//detach child process from parent process
         // Disable terminal job control for the child
-          if (setpgid(0, 0) < 0) {
+        if (setpgid(0, 0) < 0)
+        {
             perror("setpgid");
             exit(EXIT_FAILURE);
         }
@@ -248,7 +272,7 @@ int background(char **args)
     }
     else
     {
-        
+
         ++no_of_bg;
         bg_process *new_bg_process = (bg_process *)malloc(sizeof(bg_process));
         new_bg_process->command = (char *)malloc(sizeof(char) * 5000);
@@ -300,17 +324,16 @@ void check_bg_if_ended()
         }
         else if (result == temp->pid)
         {
-        
+
             if (WIFEXITED(status))
             {
                 printf("%s exited normally (%d)\n", temp->command, temp->pid);
                 remove_bg_list(temp);
                 no_of_bg--;
             }
-            else if(WIFSTOPPED(status))
+            else if (WIFSTOPPED(status))
             {
                 printf("%s stopped (%d)\n", temp->command, temp->pid);
-               
             }
             else if (WIFSIGNALED(status))
             {
@@ -327,8 +350,8 @@ void check_bg_if_ended()
 void sh_exec(char **args, char *line_execute_pastevnts)
 {
     int i = 0;
-  
-        //check for pastevents separately
+
+    // check for pastevents separately
     if (strcmp("warp", args[i]) == 0)
     {
 
@@ -348,21 +371,21 @@ void sh_exec(char **args, char *line_execute_pastevnts)
         activities();
         return;
     }
-    else if(strcmp("fg", args[0]) == 0)
-        {
-            fg(args);
-            return;
-        }
-         else if(strcmp("bg", args[0]) == 0)
-        {
-            fg(args);
-            return;
-        }
-         else if(strcmp("ping", args[0]) == 0)
-        {
-            ping(args);
-            return;
-        }
+    else if (strcmp("fg", args[0]) == 0)
+    {
+        fg(args);
+        return;
+    }
+    else if (strcmp("bg", args[0]) == 0)
+    {
+        fg(args);
+        return;
+    }
+    else if (strcmp("ping", args[0]) == 0)
+    {
+        ping(args);
+        return;
+    }
     else if ((strcmp("pastevents", args[0]) == 0) && (args[1]))
     {
         if (strcmp("purge", args[1]) == 0)
@@ -427,7 +450,7 @@ void sh_exec(char **args, char *line_execute_pastevnts)
                 strcpy(args_bg[j], args[j]);
             }
             args_bg[i - 1] = NULL;
-            
+
             background(args_bg);
             // printf("execute %s %s as background process\n", args[0], args[1]);
             for (int j = 0; j < (i - 1); j++)
@@ -448,7 +471,9 @@ void sh_exec(char **args, char *line_execute_pastevnts)
 
 int main()
 {
-    
+    saved_stdout = dup(1);
+    saved_stdin = dup(0);
+    saved_stderr = dup(STDERR_FILENO);
     no_of_bg = 0;
     OLDPWD = calloc(PATH_MAX, sizeof(char));
     Head_bg = (bg_process *)malloc(sizeof(bg_process));
@@ -457,26 +482,28 @@ int main()
     Head_bg->command = "START_DUMMY";
 
     getcwd(HOME, sizeof(HOME));
-    // printf("%s\n",HOME);
+   
     // shell is a loop that accepts commands
 
     while (1)
     {
-        prompt();                    // specification 1
-        
+        prompt(); // specification 1
+        fflush(stdout);
+
         char *line = sh_read_line(); // accept command from user
 
-        foreground_running_pid=-1;
-        
+        foreground_running_pid = -1;
 
-        if (signal(SIGINT, SIGINT_handler) == SIG_ERR) {
-          printf("SIGINT install error\n");
-          exit(1);
-     }
-      if (signal(SIGTSTP, SIGTSTP_handler) == SIG_ERR) {
-          printf("SIGSTP install error\n");
-          exit(1);
-     }
+        if (signal(SIGINT, SIGINT_handler) == SIG_ERR)
+        {
+            printf("SIGINT install error\n");
+            exit(1);
+        }
+        if (signal(SIGTSTP, SIGTSTP_handler) == SIG_ERR)
+        {
+            printf("SIGSTP install error\n");
+            exit(1);
+        }
         check_bg_if_ended();
 
         long start_of_process = time(NULL);
@@ -492,29 +519,37 @@ int main()
         if (flag_add_to_history)
             add_command(line_copy);
         strcpy(arg_0, line_copy);
-        
+
         char **commands_separated_by_semicolon = sh_extract_commands(line);
 
         int i = 0;
-        
+
         while (commands_separated_by_semicolon[i] != NULL)
         {
             // char **tokens = sh_split_line(commands_separated_by_semicolon[i]); // specification 2
             
             // redirect(commands_separated_by_semicolon[i]);
             
-            
-            char **tokens = sh_split_line(commands_separated_by_semicolon[i]); // specification 2
-
-            i++;
-            if (tokens[0] != NULL) // no command
+            if ((strstr(commands_separated_by_semicolon[i], ">") == NULL) && (strstr(commands_separated_by_semicolon[i], ">>") == NULL) && (strstr(commands_separated_by_semicolon[i], "|") == NULL) && (strstr(commands_separated_by_semicolon[i], "<") == NULL))
             {
-                sh_exec(tokens, line_copy);
+                char **tokens = sh_split_line(commands_separated_by_semicolon[i]); // specification 2
+
+                i++;
+                if (tokens[0] != NULL) // no command
+                {
+                    sh_exec(tokens, line_copy);
+                    
+                }
+
+                free(tokens);// free memory before next command
+            }
+            else
+            {
+                pipes(commands_separated_by_semicolon[i]);
+                i++; //this is a very important statement; please make sure you never make this mistake :)
             }
 
-            free(tokens);
-        
-        } // free memory before next command
+        } 
         long end_of_process = time(NULL);
         time_flag = end_of_process - start_of_process;
         char *result = strstr(line_copy, "pastevents execute");

@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#define MAX_PROGRAMS 10 // Maximum number of programs in the pipeline
 char **split_line(char *line)
 {
 
@@ -23,23 +22,22 @@ char **split_line(char *line)
     {
         if (inQuotes)
         {
-            tokens[no_of_tokens][c++]=' ';
-            for(int i=0;i<strlen(token);i++)
-                if(token[i]!='\'')
-                    tokens[no_of_tokens][c++]=token[i];
+            tokens[no_of_tokens][c++] = ' ';
+            for (int i = 0; i < strlen(token); i++)
+                if (token[i] != '\'')
+                    tokens[no_of_tokens][c++] = token[i];
         }
         else if (token[0] == '\'')
         {
             inQuotes = 1;
             c = 0;
-            tokens[no_of_tokens]=malloc(sizeof(char)*1024);
+            tokens[no_of_tokens] = malloc(sizeof(char) * 1024);
             for (int i = 1; i < strlen(token); i++)
 
             {
                 tokens[no_of_tokens][c] = token[i];
                 c++;
             }
-           
         }
         else
         {
@@ -95,132 +93,503 @@ char **extract_commands(char *line) // tokens in this are entire commands not pa
 
     return tokens;
 }
-int main()
+
+void execute_why(char **argv)
 {
+    if (strcmp("peek", argv[0]) == 0)
+    {
+        peek(argv);
+
+
+        
+    }
+    else if (strcmp("warp", argv[0]) == 0)
+    {
+
+        warp(argv); // if return with error dont add to history
+    }
+    else if (strcmp("proclore", argv[0]) == 0)
+    {
+        if (!argv[1])
+            proclore("self");
+        else
+        {
+            proclore(argv[1]);
+        }
+    }
+    else if ((strcmp("pastevents", argv[0]) == 0) && (argv[1]))
+    {
+        if (strcmp("purge", argv[1]) == 0)
+            pastevents_purge();
+    }
+    else if (strcmp("pastevents", argv[0]) == 0)
+    {
+        read_command();
+    }
+    else if (strcmp("seek", argv[0]) == 0)
+    {
+        seek(argv);
+    }
+    else if (strcmp("fg", argv[0]) == 0)
+    {
+        fg(argv);
+    }
+    else if (strcmp("bg", argv[0]) == 0)
+    {
+        bg(argv);
+    }
+    else if (strcmp("activities", argv[0]) == 0)
+    {
+        activities();
+    }
+    else if (strcmp("ping", argv[0]) == 0)
+    {
+        ping(argv);
+    }
+    else
+    {
+
+        execvp(argv[0], argv);
+        // sh_exec(args,input);
+        perror(MAG);
+        perror("execvp");
+        perror(COL_RESET);
+    }
+}
+
+int pipes(char *input_line)
+{
+    saved_stdout = dup(1);
+    saved_stdin = dup(0);
     int status;
-    int saved_stdout = dup(1);
-     int saved_stdin = dup(0);
- int saved_stderr = dup(STDERR_FILENO);
-    int pipe_fd[MAX_PROGRAMS - 1][2]; // Array of pipes for communication
-    pid_t pid[MAX_PROGRAMS];          // Array to store process IDs
-    char *input_line = NULL;
-    size_t input_size = 0;
-    int programno = 0;
-    printf("Enter a command pipeline (e.g., 'cmd1 | cmd2 | cmd3'): ");
-    getline(&input_line, &input_size, stdin);
+
+    size_t input_size = strlen(input_line);
+    int programno = 1;
+
     for (int j = 0; j < strlen(input_line); j++)
     {
         if (input_line[j] == '|')
             programno++;
     }
+
+    int pipe_fd[programno - 1][2]; // Array of pipes for communication
+    pid_t pid[programno];          // Array to store process IDs
     // Tokenize the input based on '|'
-    char **commands_separated_by_pipe = extract_commands(input_line);
 
-    int i = 0;
-    
-    while (commands_separated_by_pipe[i] != NULL)
+    for (int i = 0; i < programno; i++)
     {
+        if (pipe(pipe_fd[i]) < 0)
+        {
+            perror(MAG);
+            perror("Pipe failed");
+            perror(COL_RESET);
+            return 1;
+        }
+    }
+    char **commands_separated_by_pipe = extract_commands(input_line);
+  
+    int i = 0;
 
+    for (; i < programno; i++)
+    {
+        
+        
         char **argv = split_line(commands_separated_by_pipe[i]); // specification 2
 
         if (argv[0] != NULL) // no command
         {
-            // printf("%s ",argv[0]);
-
-            // Create a pipe for communication between processes
-            if (pipe(pipe_fd[i]) < 0)
+            // printf("%s\n",argv[0]);
+            // if (strcmp("peek", argv[0]) == 0)
+            // {
+                
+            int pid = fork();
+            foreground_running_pid = pid;
+            if (pid < 0)
             {
-                perror("Pipe failed");
-                exit(1);
+                perror(MAG);
+                perror("fork");
+                perror(COL_RESET);
             }
-
-            // Create a new process
-            pid[i] = fork();
-
-            if (pid[i] < 0)
+            else if (pid == 0)
             {
-                perror("Fork failed");
-                exit(1);
-            }
-
-            if (pid[i] == 0)
-            {
-                // Child process
-
-                // for(int j=0;j<i;j++)
-                // {
-                //     if(j!=i-1)
-                //         close(pipe_fd[j][0]);
-                //     if(j!=i)
-                //         close(pipe_fd[j][1]);
-                // }
-                if(i==0)
-                {
-                    dup2(saved_stdin, 1);
-                    close(saved_stdin);
-                }
+                
                 if (i > 0)
                 {
-                    // Redirect stdin to the previous pipe
-                    close(pipe_fd[i - 1][1]);
+                    // close(pipe_fd[i - 1][1]);
                     dup2(pipe_fd[i - 1][0], 0);
                     close(pipe_fd[i - 1][0]);
                 }
-
-                if (i < programno)
-                {
-
-                    // Redirect stdout to the next pipe
-                    close(pipe_fd[i][0]);
-                    dup2(pipe_fd[i][1], 1);
-                    close(pipe_fd[i][1]);
-                    
-                }
-
-                // Execute the program
-                if (i == programno)
-                {
-                    dup2(saved_stdout, 1);
-                    close(saved_stdout);
-                }
-                redirect(argv);
                 
-                // perror("Exec failed");
-                // exit(1);
+                if (i < programno - 1)
+                {
+                    // close(pipe_fd[i][0]);
+                    dup2(pipe_fd[i][1], 1); 
+                    close(pipe_fd[i][1]);    
+                }
+                for (int j = 0; j <= programno - 1; j++)
+                {
+                    close(pipe_fd[j][0]);
+                    close(pipe_fd[j][1]);
+                }
+                
+                
+                execute_why(argv);
+                exit(1);
             }
             else
             {
-
-                // Parent process
                 if (i > 0)
-                {
-                    // Close the previous pipe ends in the parent
                     close(pipe_fd[i - 1][0]);
-                    close(pipe_fd[i - 1][1]);
-                }
+                if (i < programno - 1)
+                    close(pipe_fd[i][1]);
+                // wait(NULL);
+                // dup2(saved_stdin, 0);
+                // close(saved_stdin);
+                // dup2(saved_stdout, 1);
+                // close(saved_stdout);
             }
-            i++;
+
+           
         }
-
         free(argv);
-
-    } // free memory before next command
-
-    // Close any remaining pipe ends in the parent
-    for (int j = 0; j < i - 1; j++)
-    {
-        close(pipe_fd[j][0]);
-        close(pipe_fd[j][1]);
     }
 
-    // // Wait for all child processes to complete
-    // for (int j = 0; j < i; j++)
-    // {
-    //     waitpid(pid[j], &status, 0);
-    // }
+ // free memory before next command
 
-    // Free dynamically allocated memory
-    free(input_line);
-
-    return 0;
+// Close any remaining pipe ends in the parent
+for (int j = 0; j < programno-1; j++)
+{
+    close(pipe_fd[j][0]);
+    close(pipe_fd[j][1]);
 }
+
+// Wait for all child processes to complete
+for (int i = 0; i < programno; i++)
+{
+    wait(NULL);
+}
+
+// Free dynamically allocated memory
+// for (int j = 0; j < i; j++)
+// {
+//     close(pipe_fd[j][0]);
+//     close(pipe_fd[j][1]);
+// }
+
+dup2(saved_stdin, 0);
+close(saved_stdin);
+dup2(saved_stdout, 1);
+close(saved_stdout);
+
+wait(NULL);
+
+return 0;
+}
+
+
+
+
+
+
+
+
+
+// }
+// else if (strcmp("warp", argv[0]) == 0)
+// {
+
+//     // if return with error dont add to history
+//     int pid = fork();
+//     foreground_running_pid = pid;
+//     if (pid < 0)
+//     {
+//         perror(MAG);
+//         perror("fork");
+//         perror(COL_RESET);
+//     }
+//     else if (pid == 0)
+//     {
+//         if (i > 0)
+//         {
+//             dup2(pipe_fd[i - 1][0], 0);
+//             close(pipe_fd[i - 1][0]);
+//         }
+//         if (i < programno - 1)
+//         {
+//             dup2(pipe_fd[i][1], 1);
+//             close(pipe_fd[i][1]);
+//         }
+//         for (int j = 0; j < programno - 1; j++)
+//         {
+//             close(pipe_fd[j][0]);
+//             close(pipe_fd[j][1]);
+//         }
+//         warp(argv);
+//         exit(1);
+//     }
+//     else
+//     {
+//         if (i > 0)
+//             close(pipe_fd[i - 1][0]);
+//         if (i < programno - 1)
+//             close(pipe_fd[i][1]);
+//     }
+// }
+// else if (strcmp("proclore", argv[0]) == 0)
+// {
+
+//     int pid = fork();
+//     foreground_running_pid = pid;
+//     if (pid < 0)
+//     {
+//         perror(MAG);
+//         perror("fork");
+//         perror(COL_RESET);
+//     }
+//     else if (pid == 0)
+//     {
+//         if (i > 0)
+//         {
+//             dup2(pipe_fd[i - 1][0], 0);
+//             close(pipe_fd[i - 1][0]);
+//         }
+//         if (i < programno - 1)
+//         {
+//             dup2(pipe_fd[i][1], 1);
+//             close(pipe_fd[i][1]);
+//         }
+//         for (int j = 0; j < programno - 1; j++)
+//         {
+//             close(pipe_fd[j][0]);
+//             close(pipe_fd[j][1]);
+//         }
+//         if (!argv[1])
+//             proclore("self");
+//         else
+//         {
+//             proclore(argv[1]);
+//         }
+//         exit(1);
+//     }
+//     else
+//     {
+//         if (i > 0)
+//             close(pipe_fd[i - 1][0]);
+//         if (i < programno - 1)
+//             close(pipe_fd[i][1]);
+//     }
+// }
+// else if ((strcmp("pastevents", argv[0]) == 0) && (argv[1]))
+// {
+
+//     int pid = fork();
+//     foreground_running_pid = pid;
+//     if (pid < 0)
+//     {
+//         perror(MAG);
+//         perror("fork");
+//         perror(COL_RESET);
+//     }
+//     else if (pid == 0)
+//     {
+//         if (i > 0)
+//         {
+//             dup2(pipe_fd[i - 1][0], 0);
+//             close(pipe_fd[i - 1][0]);
+//         }
+//         if (i < programno - 1)
+//         {
+//             dup2(pipe_fd[i][1], 1);
+//             close(pipe_fd[i][1]);
+//         }
+//         for (int j = 0; j < programno - 1; j++)
+//         {
+//             close(pipe_fd[j][0]);
+//             close(pipe_fd[j][1]);
+//         }
+//         if (strcmp("purge", argv[1]) == 0)
+//             pastevents_purge();
+//         exit(1);
+//     }
+//     else
+//     {
+//         if (i > 0)
+//             close(pipe_fd[i - 1][0]);
+//         if (i < programno - 1)
+//             close(pipe_fd[i][1]);
+//     }
+// }
+// else if (strcmp("pastevents", argv[0]) == 0)
+// {
+
+//     int pid = fork();
+//     foreground_running_pid = pid;
+//     if (pid < 0)
+//     {
+//         perror(MAG);
+//         perror("fork");
+//         perror(COL_RESET);
+//     }
+//     else if (pid == 0)
+//     {
+//         if (i > 0)
+//         {
+//             dup2(pipe_fd[i - 1][0], 0);
+//             close(pipe_fd[i - 1][0]);
+//         }
+//         if (i < programno - 1)
+//         {
+//             dup2(pipe_fd[i][1], 1);
+//             close(pipe_fd[i][1]);
+//         }
+//         for (int j = 0; j < programno - 1; j++)
+//         {
+//             close(pipe_fd[j][0]);
+//             close(pipe_fd[j][1]);
+//         }
+//         read_command();
+//         exit(1);
+//     }
+//     else
+//     {
+//         if (i > 0)
+//             close(pipe_fd[i - 1][0]);
+//         if (i < programno - 1)
+//             close(pipe_fd[i][1]);
+//     }
+// }
+// else if (strcmp("seek", argv[0]) == 0)
+// {
+
+//     int pid = fork();
+//     foreground_running_pid = pid;
+//     if (pid < 0)
+//     {
+//         perror(MAG);
+//         perror("fork");
+//         perror(COL_RESET);
+//     }
+//     else if (pid == 0)
+//     {
+//         if (i > 0)
+//         {
+//             dup2(pipe_fd[i - 1][0], 0);
+//             close(pipe_fd[i - 1][0]);
+//         }
+//         if (i < programno - 1)
+//         {
+//             dup2(pipe_fd[i][1], 1);
+//             close(pipe_fd[i][1]);
+//         }
+//         for (int j = 0; j < programno - 1; j++)
+//         {
+//             close(pipe_fd[j][0]);
+//             close(pipe_fd[j][1]);
+//         }
+//         seek(argv);
+//         exit(1);
+//     }
+//     else
+//     {
+//         if (i > 0)
+//             close(pipe_fd[i - 1][0]);
+//         if (i < programno - 1)
+//             close(pipe_fd[i][1]);
+//     }
+
+// }
+// // else if (strcmp("fg", argv[0]) == 0)
+// // {
+// //     fg(argv);
+// // }
+// // else if (strcmp("bg", argv[0]) == 0)
+// // {
+// //     bg(argv);
+// // }
+// else if (strcmp("activities", argv[0]) == 0)
+// {
+
+//     int pid = fork();
+//     foreground_running_pid = pid;
+//     if (pid < 0)
+//     {
+//         perror(MAG);
+//         perror("fork");
+//         perror(COL_RESET);
+//     }
+//     else if (pid == 0)
+//     {
+//         if (i > 0)
+//         {
+//             dup2(pipe_fd[i - 1][0], 0);
+//             close(pipe_fd[i - 1][0]);
+//         }
+//         if (i < programno - 1)
+//         {
+//             dup2(pipe_fd[i][1], 1);
+//             close(pipe_fd[i][1]);
+//         }
+//         for (int j = 0; j < programno - 1; j++)
+//         {
+//             close(pipe_fd[j][0]);
+//             close(pipe_fd[j][1]);
+//         }
+//         activities();
+//         exit(1);
+//     }
+//     else
+//     {
+//         if (i > 0)
+//             close(pipe_fd[i - 1][0]);
+//         if (i < programno - 1)
+//             close(pipe_fd[i][1]);
+//     }
+// }
+// // else if (strcmp("ping", argv[0]) == 0)
+// // {
+// //     ping(argv);
+// // }
+// else
+// {
+
+//     int pid = fork();
+//     foreground_running_pid = pid;
+//     if (pid < 0)
+//     {
+//         perror(MAG);
+//         perror("fork");
+//         perror(COL_RESET);
+//     }
+//     else if (pid == 0)
+//     {
+//         if (i > 0)
+//         {
+//             close(pipe_fd[i - 1][1]);
+//             dup2(pipe_fd[i - 1][0], 0);
+//             close(pipe_fd[i - 1][0]);
+//         }
+//         if (i < programno - 1)
+//         {
+//              close(pipe_fd[i][0]);
+//             dup2(pipe_fd[i][1], 1);
+//             close(pipe_fd[i][1]);
+//         }
+//         for (int j = 0; j < programno - 1; j++)
+//         {
+//             close(pipe_fd[j][0]);
+//             close(pipe_fd[j][1]);
+//         }
+//         execvp(argv[0], argv);
+//         // sh_exec(args,input);
+//         perror(MAG);
+//         perror("execvp");
+//         perror(COL_RESET);
+//         exit(1);
+// }
+//  else
+//             {
+//                 if (i > 0)
+//                     close(pipe_fd[i - 1][0]);
+//                 if (i < programno - 1)
+//                     close(pipe_fd[i][1]);
+//             }

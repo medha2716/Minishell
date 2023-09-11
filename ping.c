@@ -1,5 +1,11 @@
 #include "headers.h"
-
+void ignore_promptprint()
+{
+    printf("\n");
+    prompt();
+    fflush(stdout);
+    return;
+}
 int ping(char **args)
 {
     if (args[1] == NULL)
@@ -44,10 +50,11 @@ int ping(char **args)
         perror(COL_RESET);
         return 1;
     }
-    // int status;
-    // waitpid(atoi(args[1]),&status,WNOHANG);
-    // if(WIFSTOPPED(status))
-    //     printf("whoa\n");
+
+    int status;
+    waitpid(atoi(args[1]),&status,WNOHANG);
+    if(WIFSTOPPED(status))
+        printf("whoa\n");
     return 0;
 }
 
