@@ -101,7 +101,7 @@ int main()
     //# cat /proc/loadavg (input)
     //0.75 0.35 0.25 1/25 1747 (output)
     //here 1747 is the pid
-    int recent_pid=get_pid();
+    int recent_pid=-1;
     int delay;
     printf("Enter time delay: ");
     scanf("%d", &delay);
@@ -114,6 +114,7 @@ int main()
 
     while (1)
     {
+        recent_pid=get_pid();
         printf("%d\n",recent_pid);
 
         // Check if 'x' key is entered
