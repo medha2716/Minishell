@@ -104,7 +104,8 @@ int neonate(int delay)
     // # cat /proc/loadavg (input)
     // 0.75 0.35 0.25 1/25 1747 (output)
     // here 1747 is the pid
-    if ((delay < 0) || ((int)delay == delay))
+    
+    if ((delay < 0))
     {
         printf(MAG);
         printf("neonate: Invalid time_arg\n");

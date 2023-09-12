@@ -377,6 +377,16 @@ void sh_exec(char **args, char *line_execute_pastevnts)
                 printf(COL_RESET);
                 return;
             }
+            for(int q=0;q<strlen(args[2]);q++)
+            {
+                if(args[2][q]=='.')
+                {
+                    printf(MAG);
+                    printf("neonate: Invalid time_arg\n");
+                    printf(COL_RESET);
+                    return;
+                }
+            }
         neonate(atoi(args[2])); //if not a number give error
         return;
     }

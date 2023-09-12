@@ -250,6 +250,16 @@ void redirect(char *input)
                 printf(COL_RESET);
                 exit(1);
             }
+             for(int q=0;q<strlen(argv[2]);q++)
+            {
+                if(argv[2][q]=='.')
+                {
+                    printf(MAG);
+                    printf("neonate: Invalid time_arg\n");
+                    printf(COL_RESET);
+                    exit(1);
+                }
+            }
             neonate(atoi(argv[2])); // if not a number give error
             exit(1);
         }

@@ -208,6 +208,16 @@ void execute_why(char **argv)
                 printf(COL_RESET);
                 return;
             }
+             for(int q=0;q<strlen(argv[2]);q++)
+            {
+                if(argv[2][q]=='.')
+                {
+                    printf(MAG);
+                    printf("neonate: Invalid time_arg\n");
+                    printf(COL_RESET);
+                    return;
+                }
+            }
             neonate(atoi(argv[2])); // if not a number give error
             
         }
