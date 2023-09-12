@@ -6,6 +6,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <assert.h>
+#include "headers.h"
 
 void die(const char *s)
 {
@@ -57,9 +58,9 @@ int get_pid()
     FILE *loadavg_file = fopen("/proc/loadavg", "r");
     if (!loadavg_file)
     {
-        // perror(MAG);
-        perror("Error opening loadavg file");
-        // perror(COL_RESET);
+        perror(MAG);
+        perror("neonate: Error opening /proc/loadavg file");
+        perror(COL_RESET);
         return 1;
     }
 
@@ -95,41 +96,85 @@ int get_pid()
 
     return atoi(tokens[4]);
 }
+
 int neonate(int delay)
-{   // The fifth field is the PID of the process that was most recently created on the system.
-    //in proc/loadavg
-    //# cat /proc/loadavg (input)
-    //0.75 0.35 0.25 1/25 1747 (output)
-    //here 1747 is the pid
-    int recent_pid=-1;
-    // int delay;
-    // printf("Enter time delay: ");
-    // scanf("%d", &delay);
+{
+    // The fifth field is the PID of the process that was most recently created on the system.
+    // in proc/loadavg
+    // # cat /proc/loadavg (input)
+    // 0.75 0.35 0.25 1/25 1747 (output)
+    // here 1747 is the pid
+    if ((delay < 0) || ((int)delay == delay))
+    {
+        printf(MAG);
+        printf("neonate: Invalid time_arg\n");
+        printf(COL_RESET);
+        return 1;
+    }
+    int recent_pid = -1;
+
     char *inp = malloc(sizeof(char) * 100);
     char c;
     enableRawMode();
-    int stdin_flags = fcntl(STDIN_FILENO, F_GETFL);
 
-    fcntl(STDIN_FILENO, F_SETFL, stdin_flags | O_NONBLOCK); // Set non-blocking input
+    // set non-blocking input
+    int stdin_flags = fcntl(STDIN_FILENO, F_GETFL);
+    fcntl(STDIN_FILENO, F_SETFL, stdin_flags | O_NONBLOCK);
+
+    struct timeval tv;
+    fd_set readfds;
 
     while (1)
     {
-        recent_pid=get_pid();
-        printf("%d\n",recent_pid);
+        recent_pid = get_pid();
+        printf("%d\n", recent_pid);
 
-        // Check if 'x' key is entered
+        // check if 'x' key is entered
         if (read(STDIN_FILENO, &c, 1) == 1 && c == 'x')
         {
-            break; // Exit the loop when 'x' is entered
+            break; // exit the loop when 'x' is entered
         }
 
-        fflush(stdout); // Flush the output buffer to ensure prompt is displayed immediately
+        fflush(stdout); // fflush buffer to ensure prompt is displayed immediately
 
-        sleep(delay); // Sleep for the specified delay
+        // set up a non-blocking wait for user input with a timeout
+        tv.tv_sec = delay; // sleep for the specified delay
+        tv.tv_usec = 0;
+        FD_ZERO(&readfds);
+        FD_SET(STDIN_FILENO, &readfds);
+
+        // wait for input or timeout
+        int ready = select(STDIN_FILENO + 1, &readfds, NULL, NULL, &tv);
+        if (ready < 0)
+        {
+            perror(MAG);
+            perror("neonate: select");
+            perror(COL_RESET);
+            break;
+        }
+        else
+        {
+            // Data is available to be read from stdin, read and check for 'x'
+            if (read(STDIN_FILENO, &c, 1) == 1 && c == 'x')
+            {
+                break;
+            }
+            fflush(stdout);
+        }
     }
 
     fcntl(STDIN_FILENO, F_SETFL, stdin_flags); // Restore blocking input
-                                               // printf("\nInput Read: [%s]\n", inp);
+    // printf("\nInput Read: [%s]\n", inp);
     disableRawMode();
+  
     return 0;
 }
+
+
+
+
+
+
+
+
+

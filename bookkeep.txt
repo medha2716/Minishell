@@ -1,12 +1,4 @@
 15
-cat b.txt
-neonate -n 1
-sleep 5
-iMan sleep
-echo || sleep
-echo | sleep |
-echo |    | hi
-echo |      | hi
 echo |
 echo                    |
 |echo lorel | hi |
@@ -14,3 +6,9 @@ echo > hi | hi < echo |
 echo                    |
 fg 123
 bg 56
+neonate -n 3
+neonate -n 10
+neonate -n 0
+sleep 5
+x
+neonate -n 0.5
