@@ -2,9 +2,31 @@
 
 This a basic shell coded in C. 
 
-Some of the primary functions that are being used when shell is run have been described below:
+This shell implements a set of user defined commands, including seek, peek, pastevents, warp, etc. (without background functionality).
 
-1. 
+Furthermore, this shell supports other system commands through the use of execvp.
+
+Here's a brief description of this shell based on the provided specifications:
+
+- **Prompt and Command Separation**: This shell displays a prompt for user input on each line. It supports both `;` and `&` as command separators, allowing users to execute multiple commands in sequence or in the background.
+
+- **System Commands**: This shell can execute system commands like `emacs`, `gedit`, and others in both foreground and background processes.
+
+- **Foreground and Background Processes**: This shell can run commands in the foreground, waiting for them to complete before regaining control, and in the background, allowing users to continue entering commands while the background process runs.
+
+- **I/O Redirection**: This shell supports input and output redirection using symbols like `>`, `>>`, `<`, and pipes (`|`) to redirect input and output to/from files and between commands.
+
+- **Process Management**: This shell maintains a list of running processes, including their command names, PIDs, and states (running or stopped). It allows users to send signals to processes and manage them with commands like `fg`, `bg`, and process interruption with `Ctrl-C`, `Ctrl-D`, and `Ctrl-Z`.
+
+- **iMan Command**: The `iMan` command fetches man pages from the internet using sockets and outputs them to the terminal.
+
+
+To run this shell, follow these steps:
+
+1. Compile the shell using the `make` command in the terminal.
+
+2. After successful compilation, you can run the shell by executing `./minishell`.
+
 
 
 
