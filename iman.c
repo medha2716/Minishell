@@ -4,19 +4,20 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include "headers.h"
 
 #define MAX_BUFFER_SIZE 4096
 
-int main()
+int iman(char* man_page)
 {
 //     if (argc != 2)
 //     {
 //         fprintf(stderr, "Usage: %s [MAN_PAGE]\n", argv[0]);
 //         return 1;
 //     }
-    printf("Enter command\n");
-    char man_page[512];
-    scanf("%s",man_page);
+    // printf("Enter command\n");
+    // char man_page[512];
+    // scanf("%s",man_page);
     
     const char *host = "man.he.net";
     char path[1024];

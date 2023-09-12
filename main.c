@@ -376,6 +376,17 @@ void sh_exec(char **args, char *line_execute_pastevnts)
         neonate(atoi(args[2])); //if not a number give error
         return;
     }
+     else if(strcmp("iMan", args[0]) == 0)
+    {
+        if(args[1]==NULL)
+            {
+                printf("ERROR\n");
+                return;
+            }
+           
+        iman(args[1]); //if not a number give error
+        return;
+    }
     else if (strcmp("activities", args[0]) == 0)
     {
 

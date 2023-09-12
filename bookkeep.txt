@@ -1,2 +1,2 @@
 15
- cat < a.txt | wc | sed 's/ //g' | cat > b.txt
+iman sleep
