@@ -1,14 +1,11 @@
 15
-echo |
-echo                    |
-|echo lorel | hi |
-echo > hi | hi < echo |
-echo                    |
-fg 123
-bg 56
-neonate -n 3
-neonate -n 10
-neonate -n 0
 sleep 5
 x
 neonate -n 0.5
+iMan swarp
+iMan sleep
+iMan swarp
+iMan sleep
+iMan invalid_command
+iMan invalid
+cat < b.txt > a.txt > a.txt

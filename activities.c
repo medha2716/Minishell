@@ -5,9 +5,9 @@
 void activities() {
     
     bg_process *temp = Head_bg->next;
-    // Iterate over the entries in /proc
+    // iterate over the entries in list
     while (temp!=NULL) {
-        // Check if the entry is a directory and its name is numeric
+        
         if ( temp->pid > 0) {
             
                 char pid_str[256];
@@ -22,11 +22,11 @@ void activities() {
                     fscanf(stat_file_ptr, "%*d %*s %c", &state);
                     fclose(stat_file_ptr);
                     const char *state_str;
-                    // Map the state code to "running" or "stopped"
+                    
                     if(state == 'T')
-                        state_str =  "stopped";
+                        state_str =  "Stopped";
                     else 
-                        state_str =  "running";
+                        state_str =  "Running";
                      //don't print in activities if process killed
 
                     // Print the formatted entry

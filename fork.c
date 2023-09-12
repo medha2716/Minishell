@@ -101,6 +101,7 @@ void redirect(char *input)
 
     char **args = split_line(input);
     int flag_out = 0;
+    int flag_in = 0;
     // Check for redirection operators
 
     for (int i = 0; args[i] != NULL; i++)
@@ -135,7 +136,15 @@ void redirect(char *input)
 
         if (strcmp(args[i], "<") == 0)
         {
+            if (flag_in)
+            {
+                printf(MAG);
+                printf("error: invalid input output redirection\n");
+                printf(COL_RESET);
+                return;
+            }
             input_file = args[i + 1];
+            flag_in = 1;
         }
     }
     if (!flag_out)

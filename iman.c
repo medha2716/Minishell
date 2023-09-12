@@ -8,13 +8,12 @@
 
 #define MAX_BUFFER_SIZE 4096
 
-int iman(char* man_page)
+int iman(char *man_page)
 {
 
-    
     const char *host = "man.he.net";
     char path[1024];
-    snprintf(path, sizeof(path),"?topic=%s&section=all",man_page);
+    snprintf(path, sizeof(path), "?topic=%s&section=all", man_page);
     //  DNS resolution for man.he.net
     struct addrinfo hints, *res;
     memset(&hints, 0, sizeof hints);
@@ -68,56 +67,73 @@ int iman(char* man_page)
     // while ((bytes_received = recv(sockfd, buffer, sizeof(buffer) - 1, 0)) > 0)
     // {
     //     buffer[bytes_received] = '\0';
-        
+
     // } //this gets last 4096 bytes but we need the first 4096 bytes
-        // Buffer to hold received data (including space for null-termination)
+    // Buffer to hold received data (including space for null-termination)
     size_t total_bytes_received = 0; // Total bytes received
 
     // Assume you have initialized the sockfd and connected it to a remote server
-
-    while (total_bytes_received < 4096) {
+    int start = 1;
+    while (total_bytes_received < 4096)
+    {
         // Calculate how many bytes to read in this iteration
         size_t bytes_to_receive = sizeof(buffer) - 1 - total_bytes_received;
-        
+
         ssize_t bytes_received = recv(sockfd, buffer + total_bytes_received, bytes_to_receive, 0);
 
-        if (bytes_received < 0) {
+        if (bytes_received < 0)
+        {
             perror(MAG);
             perror("iMan: recv");
             perror(COL_RESET);
             break; // Error occurred, break out of the loop
-        } else if (bytes_received == 0) {
+        }
+        else if (bytes_received == 0)
+        {
             // The remote end closed the connection
             break;
-        } else {
+        }
+        else
+        {
+
             // Increment the total bytes received
             total_bytes_received += bytes_received;
             buffer[total_bytes_received] = '\0'; // Null-terminate the received data
         }
     }
     // printf("%s",buffer);
-    
-     int in_section = 0; // Flag to indicate whether we are inside a relevant section
+
+    int in_section = 0; // Flag to indicate whether we are inside a relevant section
     int in_pre = 0;     // Flag to indicate whether we are inside a <PRE> block
 
     char *line = strtok((char *)buffer, "\n");
 
-    while (line != NULL) {
+    while (line != NULL)
+    {
         // Check if we are inside a <PRE> block
-        if (strstr(line, "<PRE>") != NULL) {
+        if (strstr(line, "<PRE>") != NULL)
+        {
             in_pre = 1;
-        } else if (strstr(line, "</PRE>") != NULL) {
+        }
+        else if (strstr(line, "</PRE>") != NULL)
+        {
             in_pre = 0;
         }
 
         // Check if we are inside a relevant section
-        if (in_pre) {
+        if (in_pre)
+        {
             if (strstr(line, "NAME") != NULL ||
                 strstr(line, "SYNOPSIS") != NULL ||
-                strstr(line, "DESCRIPTION") != NULL) {
+                strstr(line, "DESCRIPTION") != NULL)
+            {
+                start = 0;
                 in_section = 1;
                 printf("%s\n", line);
-            } else if (in_section) {
+            }
+            else if (in_section)
+            {
+                start = 0;
                 // Print lines within the relevant section
                 printf("%s\n", line);
             }
@@ -144,6 +160,14 @@ int iman(char* man_page)
 
     // cleanup
     freeaddrinfo(res);
+
+    if (start)
+    {
+        printf(MAG);
+        printf("Invalid command!\n");
+        printf(COL_RESET);
+        return 1;
+    }
 
     return 0;
 }

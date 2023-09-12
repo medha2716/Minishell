@@ -52,6 +52,7 @@ void spec11(char *input_line)
 
         char **args = split_line(commands_separated_by_pipe[i]); // specification 2
         int flag_out = 0;
+        int flag_in = 0;
         // Check for redirection operators
 
         char *input_file = NULL;
@@ -90,7 +91,15 @@ void spec11(char *input_line)
 
             if (strcmp(args[i], "<") == 0)
             {
+                if (flag_in)
+                {
+                    printf(MAG);
+                    printf("error: invalid input output redirection\n");
+                    printf(COL_RESET);
+                    return;
+                }
                 input_file = args[i + 1];
+                flag_in = 1;
             }
         }
         if (!flag_out)
