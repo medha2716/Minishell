@@ -6,6 +6,42 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+int check_pipe(const char *string) {
+    int len = strlen(string);
+    
+    // check for a pipe at the beginning
+    if (string[0] == '|')
+        return 0;
+    
+    // check for a pipe at the end
+    if (string[len - 1] == '|')
+        return 0;
+
+    for (int i = 1; i < len - 1; i++) {
+        if (string[i] == '|') {
+            // check left of the pipe
+            int left = i - 1;
+            while (left >= 0 && (string[left] == ' ' || string[left] == '\t' || string[left] == '\n'))
+                left--;
+            
+            if (left < 0 || string[left] == '|')
+            {
+                 return 0;
+            }
+               
+
+            // check right of the pipe
+            int right = i + 1;
+            while (right < len && (string[right] == ' ' || string[right] == '\t' || string[right] == '\n'))
+                right++;
+            if (right >= len || string[right] == '|')
+                return 0;
+        }
+    }
+
+    return 1;
+}
+
 char **split_line(char *line)
 {
 
@@ -259,10 +295,18 @@ int pipes(char *input_line)
     size_t input_size = strlen(input_line);
     int programno = 1;
 
+    if(!check_pipe(input_line))
+    {
+        printf(MAG);
+        printf("Invalid use of pipe\n");
+        printf(COL_RESET);
+        return 1;
+    }
+
     for (int j = 0; j < strlen(input_line); j++)
     {
         if (input_line[j] == '|')
-            programno++;
+            programno++; 
     }
 
     int pipe_fd[programno - 1][2]; // Array of pipes for communication

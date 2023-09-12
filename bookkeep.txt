@@ -1,11 +1,16 @@
-10
-at < a.txt
-echo hiiiii > b.txt
-peek -l
-cat < a.txt
-echo "Lorem Ipsum" | wc
-warp ... | wc
-echo lorel | wc
+15
 iMan sleep | wc
 cat < a.txt | wc | sed 's/ //g' | cat > b.txt
 cat b.txt
+neonate -n 1
+sleep 5
+iMan sleep
+echo || sleep
+echo | sleep |
+echo |    | hi
+echo |      | hi
+echo |
+echo                    |
+|echo lorel | hi |
+echo > hi | hi < echo |
+echo                    |

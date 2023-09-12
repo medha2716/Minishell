@@ -51,10 +51,10 @@ int ping(char **args)
         return 1;
     }
 
-    int status;
-    waitpid(atoi(args[1]),&status,WNOHANG);
-    if(WIFSTOPPED(status))
-        printf("whoa\n");
+    // int status;
+    // waitpid(atoi(args[1]),&status,WNOHANG);
+    // if(WIFSTOPPED(status))
+    //     printf("whoa\n");
     return 0;
 }
 

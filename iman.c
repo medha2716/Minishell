@@ -10,19 +10,12 @@
 
 int iman(char* man_page)
 {
-//     if (argc != 2)
-//     {
-//         fprintf(stderr, "Usage: %s [MAN_PAGE]\n", argv[0]);
-//         return 1;
-//     }
-    // printf("Enter command\n");
-    // char man_page[512];
-    // scanf("%s",man_page);
+
     
     const char *host = "man.he.net";
     char path[1024];
     snprintf(path, sizeof(path),"?topic=%s&section=all",man_page);
-    // Step 1: DNS resolution for man.he.net
+    //  DNS resolution for man.he.net
     struct addrinfo hints, *res;
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET; // IPv4
@@ -34,7 +27,7 @@ int iman(char* man_page)
         return 1;
     }
 
-    // Step 2: Open a TCP socket to the IP address
+    //  open a TCP socket to the IP address
     int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sockfd == -1)
     {
@@ -42,14 +35,14 @@ int iman(char* man_page)
         return 1;
     }
 
-    // Step 3: Connect to the website's server
+    //  connect to the website's server
     if (connect(sockfd, res->ai_addr, res->ai_addrlen) == -1)
     {
         perror("connect");
         return 1;
     }
 
-    // Step 4: Send a GET request to the website's server
+    // send a GET request to the website's server
     char request[4096];
 
     snprintf(request, sizeof(request), "GET %s HTTP/1.1\r\nHost: %s\r\n\r\n", path, host);
@@ -59,7 +52,7 @@ int iman(char* man_page)
         return 1;
     }
 
-    // Step 5: Read the body of the website and print it to stdout
+    // read the body of the website and print it to stdout
     char buffer[MAX_BUFFER_SIZE];
     int bytes_received;
     int headers_end = 0; // Flag to indicate the end of headers
@@ -134,10 +127,10 @@ int iman(char* man_page)
         return 1;
     }
 
-    // Step 6: Close the socket
+    // close the socket
     close(sockfd);
 
-    // Cleanup
+    // cleanup
     freeaddrinfo(res);
 
     return 0;

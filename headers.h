@@ -102,6 +102,8 @@ void execute(char *line);
 
 int redirect_execute_command(int command_position);
 
+int check_pipe(const char *string);
+
 
 #endif
 // 

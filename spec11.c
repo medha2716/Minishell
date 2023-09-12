@@ -15,6 +15,14 @@ void spec11(char *input_line)
     size_t input_size = strlen(input_line);
     int programno = 1;
 
+    if(!check_pipe(input_line))
+    {
+        printf(MAG);
+        printf("Invalid use of pipe\n");
+        printf(COL_RESET);
+        return ;
+    }
+
     for (int j = 0; j < strlen(input_line); j++)
     {
         if (input_line[j] == '|')
