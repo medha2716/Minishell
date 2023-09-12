@@ -47,7 +47,7 @@ The following assumptions have been made in the design and functionality of our 
 
 ### Part B
 - Background processes cannot be created along with piping and redirection.
-- For neonate, If anything other than 'x' is given as input (eg. Ctrl + C), the pid continues to be printed. 
+- For neonate, If anything other than 'x' is given as input , the pid continues to be printed. However, it goes to next prompt if signals (eg. Ctrl + C) are sent. (as per doubts document, signal handling was not required to be handled for neonate)
 - "exit" is not being stored in the pastevents.
 - For I/O redirection multiple input files (or) multiple output files cannot be used and will give error (or lead to undefined behaviour in some cases). 
 - For activities, all processes that have not been stopped (process state: 'T') or killed are shown as 'Running' (according to specifications).
