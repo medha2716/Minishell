@@ -182,7 +182,7 @@ void redirect(char *input)
                 proclore("self");
             else
             {
-                proclore(args[1]);
+                proclore(argv[1]);
             }
             exit(1);
         }
@@ -190,9 +190,9 @@ void redirect(char *input)
         {
             if (strcmp("purge", argv[1]) == 0)
                 pastevents_purge();
-            else if (strcmp("execute", args[1]) == 0)
+            else if (strcmp("execute", argv[1]) == 0)
             {
-                if (!args[2])
+                if (!argv[2])
                 {
                     printf(MAG);
                     printf("ERROR: pastevents execute: too few arguments\n");
@@ -201,7 +201,7 @@ void redirect(char *input)
                 }
                 else
                 {
-                    int pos = atoi(args[2]);
+                    int pos = atoi(argv[2]);
                     if (pos < 1)
                     {
                         printf(MAG);
@@ -225,28 +225,28 @@ void redirect(char *input)
             seek(argv);
             exit(1);
         }
-        else if (strcmp("neonate", args[0]) == 0)
+        else if (strcmp("neonate", argv[0]) == 0)
         {
-            if (args[1] == NULL)
+            if (argv[1] == NULL)
             {
                 printf(MAG);
                 printf("neonate: usage: neonate -n [time_arg]\n");
                 printf(COL_RESET);
                 exit(1);
             }
-            if (args[2] == NULL)
+            if (argv[2] == NULL)
             {
                 printf(MAG);
                 printf("neonate: usage: neonate -n [time_arg]\n");
                 printf(COL_RESET);
                 exit(1);
             }
-            neonate(atoi(args[2])); // if not a number give error
+            neonate(atoi(argv[2])); // if not a number give error
             exit(1);
         }
-        else if (strcmp("iMan", args[0]) == 0)
+        else if (strcmp("iMan", argv[0]) == 0)
         {
-            if (args[1] == NULL)
+            if (argv[1] == NULL)
             {
                 printf(MAG);
                 printf("iMan: usage: iMan <command_name>\n");
@@ -254,56 +254,56 @@ void redirect(char *input)
                 exit(1);
             }
 
-            iman(args[1]); // if not a number give error
+            iman(argv[1]); // if not a number give error
             exit(1);
         }
-        else if (strcmp("activities", args[0]) == 0)
+        else if (strcmp("activities", argv[0]) == 0)
         {
 
             activities();
             exit(1);
         }
-        else if (strcmp("fg", args[0]) == 0)
+        else if (strcmp("fg", argv[0]) == 0)
         {
-            if (args[1] == NULL)
+            if (argv[1] == NULL)
             {
                 printf(MAG);
                 printf("fg: usage: fg <pid>\n");
                 printf(COL_RESET);
                 exit(1);
             }
-            fg(args);
+            fg(argv);
             exit(1);
         }
-        else if (strcmp("bg", args[0]) == 0)
+        else if (strcmp("bg", argv[0]) == 0)
         {
-            if (args[1] == NULL)
+            if (argv[1] == NULL)
             {
                 printf(MAG);
                 printf("bg: usage: bg <pid>\n");
                 printf(COL_RESET);
                 exit(1);
             }
-            bg(args);
+            bg(argv);
             exit(1);
         }
-        else if (strcmp("ping", args[0]) == 0)
+        else if (strcmp("ping", argv[0]) == 0)
         {
-            if (args[1] == NULL)
+            if (argv[1] == NULL)
             {
                 printf(MAG);
                 printf("ping: usage: ping <pid> <signal_number>\n");
                 printf(COL_RESET);
                 exit(1);
             }
-            if (args[2] == NULL)
+            if (argv[2] == NULL)
             {
                 printf(MAG);
                 printf("ping: usage: ping <pid> <signal_number>\n");
                 printf(COL_RESET);
                 exit(1);
             }
-            ping(args);
+            ping(argv);
             exit(1);
         }
         else
@@ -311,7 +311,7 @@ void redirect(char *input)
             if (execvp(argv[0], argv))
             {
                 printf(MAG);
-                printf("ERROR: '%s' is not a valid command\n", args[0]);
+                printf("ERROR: '%s' is not a valid command\n", argv[0]);
                 printf(COL_RESET);
                 exit(1);
             }

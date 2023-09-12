@@ -96,65 +96,158 @@ char **extract_commands(char *line) // tokens in this are entire commands not pa
 
 void execute_why(char **argv)
 {
-    if (strcmp("peek", argv[0]) == 0)
-    {
-        peek(argv);
+     if (strcmp("peek", argv[0]) == 0)
+        {
+            peek(argv);
+            
+        }
+        else if (strcmp("warp", argv[0]) == 0)
+        {
 
+            warp(argv); // if return with error dont add to history
+       
+        }
+        else if (strcmp("proclore", argv[0]) == 0)
+        {
+            if (!argv[1])
+                proclore("self");
+            else
+            {
+                proclore(argv[1]);
+            }
+          
+        }
+        else if ((strcmp("pastevents", argv[0]) == 0) && (argv[1]))
+        {
+            if (strcmp("purge", argv[1]) == 0)
+                pastevents_purge();
+            else if (strcmp("execute", argv[1]) == 0)
+            {
+                if (!argv[2])
+                {
+                    printf(MAG);
+                    printf("ERROR: pastevents execute: too few arguments\n");
+                    printf(COL_RESET);
+                    return;
+                }
+                else
+                {
+                    int pos = atoi(argv[2]);
+                    if (pos < 1)
+                    {
+                        printf(MAG);
+                        printf("ERROR: pastevents: No command at entered position!\n");
+                        printf(COL_RESET);
+                        return;
+                    }
+                    // printf("%d\n",pos);
+                    redirect_execute_command(pos);
+                }
+            }
+            
+        }
+        else if (strcmp("pastevents", argv[0]) == 0)
+        {
+            read_command();
+            
+        }
+        else if (strcmp("seek", argv[0]) == 0)
+        {
+            seek(argv);
+            
+        }
+        else if (strcmp("neonate", argv[0]) == 0)
+        {
+            if (argv[1] == NULL)
+            {
+                printf(MAG);
+                printf("neonate: usage: neonate -n [time_arg]\n");
+                printf(COL_RESET);
+                return;
+            }
+            if (argv[2] == NULL)
+            {
+                printf(MAG);
+                printf("neonate: usage: neonate -n [time_arg]\n");
+                printf(COL_RESET);
+                return;
+            }
+            neonate(atoi(argv[2])); // if not a number give error
+            
+        }
+        else if (strcmp("iMan", argv[0]) == 0)
+        {
+            if (argv[1] == NULL)
+            {
+                printf(MAG);
+                printf("iMan: usage: iMan <command_name>\n");
+                printf(COL_RESET);
+                return;
+            }
 
-        
-    }
-    else if (strcmp("warp", argv[0]) == 0)
-    {
+            iman(argv[1]); // if not a number give error
+          
+        }
+        else if (strcmp("activities", argv[0]) == 0)
+        {
 
-        warp(argv); // if return with error dont add to history
-    }
-    else if (strcmp("proclore", argv[0]) == 0)
-    {
-        if (!argv[1])
-            proclore("self");
+            activities();
+            
+        }
+        else if (strcmp("fg", argv[0]) == 0)
+        {
+            if (argv[1] == NULL)
+            {
+                printf(MAG);
+                printf("fg: usage: fg <pid>\n");
+                printf(COL_RESET);
+                return;
+            }
+            fg(argv);
+          
+        }
+        else if (strcmp("bg", argv[0]) == 0)
+        {
+            if (argv[1] == NULL)
+            {
+                printf(MAG);
+                printf("bg: usage: bg <pid>\n");
+                printf(COL_RESET);
+                return;
+            }
+            bg(argv);
+     
+        }
+        else if (strcmp("ping", argv[0]) == 0)
+        {
+            if (argv[1] == NULL)
+            {
+                printf(MAG);
+                printf("ping: usage: ping <pid> <signal_number>\n");
+                printf(COL_RESET);
+                return;
+            }
+            if (argv[2] == NULL)
+            {
+                printf(MAG);
+                printf("ping: usage: ping <pid> <signal_number>\n");
+                printf(COL_RESET);
+                return;
+            }
+            ping(argv);
+    
+        }
         else
         {
-            proclore(argv[1]);
+            if (execvp(argv[0], argv))
+            {
+                printf(MAG);
+                printf("ERROR: '%s' is not a valid command\n", argv[0]);
+                printf(COL_RESET);
+                return;
+            }
+ 
         }
-    }
-    else if ((strcmp("pastevents", argv[0]) == 0) && (argv[1]))
-    {
-        if (strcmp("purge", argv[1]) == 0)
-            pastevents_purge();
-    }
-    else if (strcmp("pastevents", argv[0]) == 0)
-    {
-        read_command();
-    }
-    else if (strcmp("seek", argv[0]) == 0)
-    {
-        seek(argv);
-    }
-    else if (strcmp("fg", argv[0]) == 0)
-    {
-        fg(argv);
-    }
-    else if (strcmp("bg", argv[0]) == 0)
-    {
-        bg(argv);
-    }
-    else if (strcmp("activities", argv[0]) == 0)
-    {
-        activities();
-    }
-    else if (strcmp("ping", argv[0]) == 0)
-    {
-        ping(argv);
-    }
-    else
-    {
-
-        execvp(argv[0], argv);
-        // sh_exec(args,input);
-        perror(MAG);
-        perror("execvp");
-        perror(COL_RESET);
-    }
 }
 
 int pipes(char *input_line)
@@ -266,7 +359,8 @@ for (int j = 0; j < programno-1; j++)
 // Wait for all child processes to complete
 for (int i = 0; i < programno; i++)
 {
-    wait(NULL);
+    int status;
+    waitpid(pid[i], &status, WUNTRACED);
 }
 
 // Free dynamically allocated memory
@@ -281,7 +375,7 @@ close(saved_stdin);
 dup2(saved_stdout, 1);
 close(saved_stdout);
 
-wait(NULL);
+wait(NULL); // wait for this function to end otherwise prompt gets printed first
 
 return 0;
 }

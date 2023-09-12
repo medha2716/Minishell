@@ -1,5 +1,9 @@
-4
+8
 cat < a.txt
 echo hiiiii > b.txt
 peek -l
 cat < a.txt
+echo "Lorem Ipsum" | wc
+warp ... | wc
+echo lorel | wc
+iMan sleep | wc
