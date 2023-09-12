@@ -1,7 +1,4 @@
-11
-iMan invalid_command
-iMan invalid
-cat < b.txt > a.txt > a.txt
+15
 neonate -n 3
 neonate -n 0.5
 echo lorel | wc
@@ -10,3 +7,10 @@ neonate -n -2
 neonate -n 0.5
 neonate -n 3
 cat < a.txt < b.txt
+sleep 5
+sleep 5
+sleep 30
+sleep 30
+fg 78838
+sleep 30
+sleep 30

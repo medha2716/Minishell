@@ -553,23 +553,32 @@ int main()
 
     while (1)
     {
+        
+         if (signal(SIGINT, SIGINT_handler) == SIG_ERR)
+        {
+            printf(MAG);
+            printf("SIGINT install error\n");
+            printf(COL_RESET);
+            exit(1);
+        }
+
+         if (signal(SIGTSTP, SIGTSTP_handler) == SIG_ERR)
+        {
+            printf(MAG);
+            printf("SIGSTP install error\n");
+            printf(COL_RESET);
+            exit(1);
+        }
+
+        foreground_running_pid = -1;
+        
         prompt(); // specification 1
         fflush(stdout);
 
         char *line = sh_read_line(); // accept command from user
 
-        foreground_running_pid = -1;
+       
 
-        if (signal(SIGINT, SIGINT_handler) == SIG_ERR)
-        {
-            printf("SIGINT install error\n");
-            exit(1);
-        }
-        if (signal(SIGTSTP, SIGTSTP_handler) == SIG_ERR)
-        {
-            printf("SIGSTP install error\n");
-            exit(1);
-        }
         check_bg_if_ended();
 
         long start_of_process = time(NULL);
