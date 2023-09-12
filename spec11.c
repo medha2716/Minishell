@@ -32,7 +32,7 @@ void spec11(char *input_line)
             perror(MAG);
             perror("Pipe failed");
             perror(COL_RESET);
-            return ;
+            return;
         }
     }
     char **commands_separated_by_pipe = extract_commands(input_line);
@@ -57,7 +57,9 @@ void spec11(char *input_line)
             {
                 if (flag_out)
                 {
-                    printf("ERROR\n");
+                    printf(MAG);
+                    printf("error: invalid input output redirection\n");
+                    printf(COL_RESET);
                     return;
                 }
                 append = 0;
@@ -68,7 +70,9 @@ void spec11(char *input_line)
             {
                 if (flag_out)
                 {
-                    printf("ERROR\n");
+                    printf(MAG);
+                    printf("error: invalid input output redirection\n");
+                    printf(COL_RESET);
                     return;
                 }
                 append = 1;
@@ -104,7 +108,7 @@ void spec11(char *input_line)
             else if (pid == 0)
             {
                 redirect_io(input_file, output_file, append);
-                char **argv = (char **)malloc(4096 * sizeof(char *));
+                char **argv = (char **)malloc(5000 * sizeof(char *));
                 for (int i = 0; args[i] != NULL; i++)
                 {
                     if ((strcmp(args[i], ">>") == 0) || (strcmp(args[i], ">") == 0) || (strcmp(args[i], "<") == 0))
@@ -162,7 +166,8 @@ void spec11(char *input_line)
     // Wait for all child processes to complete
     for (int i = 0; i < programno; i++)
     {
-        wait(NULL);
+        int status;
+        waitpid(pid[i], &status, WUNTRACED);
     }
 
     // Free dynamically allocated memory
@@ -179,5 +184,5 @@ void spec11(char *input_line)
 
     wait(NULL);
 
-    return ;
+    return;
 }
