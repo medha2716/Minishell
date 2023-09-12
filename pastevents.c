@@ -225,6 +225,7 @@ void execute(char *line)
         if (tokens[0] != NULL) // no command
         {
             sh_exec(tokens, line_copy);
+            
         }
 
         free(tokens);

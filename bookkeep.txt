@@ -1,2 +1,5 @@
-15
-iman sleep
+4
+cat < a.txt
+echo hiiiii > b.txt
+peek -l
+cat < a.txt

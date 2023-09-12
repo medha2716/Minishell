@@ -365,12 +365,16 @@ void sh_exec(char **args, char *line_execute_pastevnts)
     {
         if(args[1]==NULL)
             {
-                printf("ERROR\n");
+                printf(MAG);
+                printf("neonate: usage: neonate -n [time_arg]\n");
+                printf(COL_RESET);
                 return;
             }
              if(args[2]==NULL)
             {
-                printf("ERROR\n");
+                printf(MAG);
+                printf("neonate: usage: neonate -n [time_arg]\n");
+                printf(COL_RESET);
                 return;
             }
         neonate(atoi(args[2])); //if not a number give error
@@ -380,7 +384,9 @@ void sh_exec(char **args, char *line_execute_pastevnts)
     {
         if(args[1]==NULL)
             {
-                printf("ERROR\n");
+                printf(MAG);
+                printf("iMan: usage: iMan <command_name>\n");
+                printf(COL_RESET);
                 return;
             }
            
@@ -395,16 +401,44 @@ void sh_exec(char **args, char *line_execute_pastevnts)
     }
     else if (strcmp("fg", args[0]) == 0)
     {
+        if(args[1]==NULL)
+        {
+            printf(MAG);
+            printf("fg: usage: fg <pid>\n");
+            printf(COL_RESET);
+            return;
+        }
         fg(args);
         return;
     }
     else if (strcmp("bg", args[0]) == 0)
     {
-        fg(args);
+        if(args[1]==NULL)
+        {
+            printf(MAG);
+            printf("bg: usage: bg <pid>\n");
+            printf(COL_RESET);
+            return;
+        }
+        bg(args);
         return;
     }
     else if (strcmp("ping", args[0]) == 0)
     {
+        if(args[1]==NULL)
+        {
+            printf(MAG);
+            printf("ping: usage: ping <pid> <signal_number>\n");
+            printf(COL_RESET);
+            return;
+        }
+        if(args[2]==NULL)
+        {
+            printf(MAG);
+            printf("ping: usage: ping <pid> <signal_number>\n");
+            printf(COL_RESET);
+            return;
+        }
         ping(args);
         return;
     }

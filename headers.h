@@ -98,6 +98,10 @@ int neonate(int delay);
 
 int iman(char* man_page);
 
+void execute(char *line);
+
+int redirect_execute_command(int command_position);
+
 
 #endif
 // 
