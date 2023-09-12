@@ -60,7 +60,7 @@ int get_pid()
         // perror(MAG);
         perror("Error opening loadavg file");
         // perror(COL_RESET);
-        return;
+        return 1;
     }
 
     // Read the required information from the loadavg file
@@ -95,16 +95,16 @@ int get_pid()
 
     return atoi(tokens[4]);
 }
-int main()
+int neonate(int delay)
 {   // The fifth field is the PID of the process that was most recently created on the system.
     //in proc/loadavg
     //# cat /proc/loadavg (input)
     //0.75 0.35 0.25 1/25 1747 (output)
     //here 1747 is the pid
     int recent_pid=-1;
-    int delay;
-    printf("Enter time delay: ");
-    scanf("%d", &delay);
+    // int delay;
+    // printf("Enter time delay: ");
+    // scanf("%d", &delay);
     char *inp = malloc(sizeof(char) * 100);
     char c;
     enableRawMode();

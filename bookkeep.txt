@@ -1,2 +1,2 @@
 15
-git commit -m "piping works"
+ cat < a.txt | wc | sed 's/ //g' | cat > b.txt

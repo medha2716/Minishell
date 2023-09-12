@@ -361,6 +361,21 @@ void sh_exec(char **args, char *line_execute_pastevnts)
         peek(args);
         return;
     }
+    else if(strcmp("neonate", args[0]) == 0)
+    {
+        if(args[1]==NULL)
+            {
+                printf("ERROR\n");
+                return;
+            }
+             if(args[2]==NULL)
+            {
+                printf("ERROR\n");
+                return;
+            }
+        neonate(atoi(args[2])); //if not a number give error
+        return;
+    }
     else if (strcmp("activities", args[0]) == 0)
     {
 

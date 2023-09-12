@@ -94,6 +94,8 @@ void execute_why(char **argv);
 
 void spec11(char *input_line);
 
+int neonate(int delay);
+
 
 #endif
 // 
