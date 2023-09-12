@@ -1,6 +1,4 @@
 15
-iMan sleep | wc
-cat < a.txt | wc | sed 's/ //g' | cat > b.txt
 cat b.txt
 neonate -n 1
 sleep 5
@@ -14,3 +12,5 @@ echo                    |
 |echo lorel | hi |
 echo > hi | hi < echo |
 echo                    |
+fg 123
+bg 56

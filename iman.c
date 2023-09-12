@@ -23,7 +23,9 @@ int iman(char* man_page)
 
     if (getaddrinfo(host, "http", &hints, &res) != 0)
     {
-        perror("getaddrinfo");
+        perror(MAG);
+        perror("iMan: getaddrinfo");
+        perror(COL_RESET);
         return 1;
     }
 
@@ -31,14 +33,18 @@ int iman(char* man_page)
     int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sockfd == -1)
     {
-        perror("socket");
+        perror(MAG);
+        perror("iMan: socket");
+        perror(COL_RESET);
         return 1;
     }
 
     //  connect to the website's server
     if (connect(sockfd, res->ai_addr, res->ai_addrlen) == -1)
     {
-        perror("connect");
+        perror(MAG);
+        perror("iMan: connect");
+        perror(COL_RESET);
         return 1;
     }
 
@@ -48,7 +54,9 @@ int iman(char* man_page)
     snprintf(request, sizeof(request), "GET %s HTTP/1.1\r\nHost: %s\r\n\r\n", path, host);
     if (send(sockfd, request, strlen(request), 0) == -1)
     {
-        perror("send");
+        perror(MAG);
+        perror("iMan: send");
+        perror(COL_RESET);
         return 1;
     }
 
@@ -74,7 +82,9 @@ int iman(char* man_page)
         ssize_t bytes_received = recv(sockfd, buffer + total_bytes_received, bytes_to_receive, 0);
 
         if (bytes_received < 0) {
-            perror("recv");
+            perror(MAG);
+            perror("iMan: recv");
+            perror(COL_RESET);
             break; // Error occurred, break out of the loop
         } else if (bytes_received == 0) {
             // The remote end closed the connection
@@ -123,7 +133,9 @@ int iman(char* man_page)
 
     if (bytes_received == -1)
     {
-        perror("recv");
+        perror(MAG);
+        perror("iMan: recv");
+        perror(COL_RESET);
         return 1;
     }
 
